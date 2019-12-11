@@ -57,8 +57,6 @@ Citizen.CreateThread(function()
 	function VersionCheck(err, response, headers)
 		if err == 200 then
 			local Data = json.decode(response)
-			print('Current Version: ' .. tostring(CurrentVersion))
-			print('Updated Version: ' .. tostring(Data.NewestVersion))
 			if tonumber(CurrentVersion) < tonumber(Data.NewestVersion) then
 				print('\n--------------------------------------------------------------------------')
 				print('\nSEM_InteractionMenu is outdated!')
