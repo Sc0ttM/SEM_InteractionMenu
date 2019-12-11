@@ -70,7 +70,7 @@ Citizen.CreateThread(function()
 			elseif tonumber(CurrentVersion) > tonumber(Data.NewestVersion) then
 				print('^3Your version of SEM_InteractionMenu is higher than the current version!^7')
 			else
-				print('^2SEM_InteractionMenu is up to date!')
+				print('^2SEM_InteractionMenu is up to date!^7')
 			end
 		else
 			print('^1SEM_InteractionMenu Version Check Failed!^7')
