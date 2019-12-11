@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (menu.lua) - Created by Scott M
-	Current Version: v1.0 (Nov 2019)
+	Current Version: v1.1 (Dec 2019)
 	
 	Support | https://semdevelopment.com/discord
 	
@@ -240,8 +240,8 @@ function LEO(menu)
         local LEOLoadouts = _MenuPool:AddSubMenu(LEOMenu, 'Loadouts', '', true)
         LEOLoadouts:SetMenuWidthOffset(Config.MenuWidth)
             UniformsList = {}
-            for k, v in pairs(Config.LEOUniforms) do
-                table.insert(UniformsList, v.name)
+            for _, Uniform in pairs(Config.LEOUniforms) do
+                table.insert(UniformsList, Uniform.name)
             end
             
             
@@ -258,13 +258,10 @@ function LEO(menu)
             LEOLoadouts:AddItem(Loadouts)
             LEOLoadouts.OnListSelect = function(sender, item, index)
 				if item == Uniforms then
-                    local Unif = {}
-                    for k, v in pairs(Config.LEOUniforms) do
-                        if v.name == item:IndexToItem(index) then
-                            Unif = v
-
-                            LoadPed(Unif.spawncode)
-                            Notify('~b~Uniform Spawned: ~g~' .. Unif.name)
+                    for _, Uniform in pairs(Config.LEOUniforms) do
+                        if Uniform.name == item:IndexToItem(index) then
+                            LoadPed(Uniform.spawncode)
+                            Notify('~b~Uniform Spawned: ~g~' .. Uniform.name)
                         end
                     end
                 end
@@ -329,17 +326,17 @@ function LEO(menu)
             local LEOVehicles = _MenuPool:AddSubMenu(LEOMenu, 'Vehicles', '', true)
             LEOVehicles:SetMenuWidthOffset(Config.MenuWidth)
             
-			for k, v in pairs(Config.LEOVehiclesCategories) do
-                local LEOCategory = _MenuPool:AddSubMenu(LEOVehicles, k, '', true)
+			for Name, Category in pairs(Config.LEOVehiclesCategories) do
+                local LEOCategory = _MenuPool:AddSubMenu(LEOVehicles, Name, '', true)
                 LEOCategory:SetMenuWidthOffset(Config.MenuWidth)
-                for n, s in pairs(v) do
-                    local LEOVehicle = NativeUI.CreateItem(s.name, '')
+                for _, Vehicle in pairs(Category) do
+                    local LEOVehicle = NativeUI.CreateItem(Vehicle.name, '')
                     LEOCategory:AddItem(LEOVehicle)
                     if Config.ShowLEOSpawnCode then
-                        LEOVehicle:RightLabel(s.spawncode)
+                        LEOVehicle:RightLabel(Vehicle.spawncode)
                     end
                     LEOVehicle.Activated = function(ParentMenu, SelectedItem)
-                        SpawnVehicle(s.spawncode, s.name)
+                        SpawnVehicle(Vehicle.spawncode, Vehicle.name)
                     end
                 end
             end
@@ -442,8 +439,8 @@ function Fire(menu)
         local FireLoadouts = _MenuPool:AddSubMenu(FireMenu, 'Loadouts', '', true)
         FireLoadouts:SetMenuWidthOffset(Config.MenuWidth)
             UniformsList = {}
-            for k, v in pairs(Config.FireUniforms) do
-                table.insert(UniformsList, v.name)
+            for _, Uniform in pairs(Config.FireUniforms) do
+                table.insert(UniformsList, Uniform.name)
             end
                 
                 
@@ -459,13 +456,10 @@ function Fire(menu)
             FireLoadouts:AddItem(Loadouts)
             FireLoadouts.OnListSelect = function(sender, item, index)
                 if item == Uniforms then
-                    local Unif = {}
-                    for k, v in pairs(Config.FireUniforms) do
-                        if v.name == item:IndexToItem(index) then
-                            Unif = v
-    
-                            LoadPed(Unif.spawncode)
-                            Notify('~b~Uniform Spawned: ~g~' .. Unif.name)
+                    for _, Uniform in pairs(Config.FireUniforms) do
+                        if Uniform.name == item:IndexToItem(index) then
+                            LoadPed(Uniform.spawncode)
+                            Notify('~b~Uniform Spawned: ~g~' .. Uniform.name)
                         end
                     end
                 end
@@ -495,14 +489,14 @@ function Fire(menu)
             local FireVehicles = _MenuPool:AddSubMenu(FireMenu, 'Vehicles', '', true)
             FireVehicles:SetMenuWidthOffset(Config.MenuWidth)
             
-			for n, s in pairs(Config.FireVehicles) do
-                local FireVehicle = NativeUI.CreateItem(s.name, '')
+			for _, Vehicle in pairs(Config.FireVehicles) do
+                local FireVehicle = NativeUI.CreateItem(Vehicle.name, '')
                 FireVehicles:AddItem(FireVehicle)
                 if Config.ShowFireSpawnCode then
-                    FireVehicle:RightLabel(s.spawncode)
+                    FireVehicle:RightLabel(Vehicle.spawncode)
                 end
                 FireVehicle.Activated = function(ParentMenu, SelectedItem)
-                    SpawnVehicle(s.spawncode, s.name)
+                    SpawnVehicle(Vehicle.spawncode, Vehicle.name)
                 end
             end
         end
@@ -560,8 +554,8 @@ function Civ(menu)
             end
         local CivAdverts = _MenuPool:AddSubMenu(CivMenu, 'Adverts', 'Civilian Adverts')
         CivAdverts:SetMenuWidthOffset(Config.MenuWidth)
-			for k, v in pairs(Config.CivAdverts) do
-                local Advert  = NativeUI.CreateItem(v.name, '')
+			for _, Ad in pairs(Config.CivAdverts) do
+                local Advert  = NativeUI.CreateItem(Ad.name, '')
                 CivAdverts:AddItem(Advert)
                 Advert.Activated = function(ParentMenu, SelectedItem)
 					local Message = KeyboardInput('Message:', 128)
@@ -570,21 +564,21 @@ function Civ(menu)
 						return
 					end
 		
-					TriggerServerEvent('SEM_Ads', Message, v.name, v.loc, v.file)
+					TriggerServerEvent('SEM_Ads', Message, Ad.name, Ad.loc, Ad.file)
                 end
             end
 		if Config.ShowCivVehicles then
             local CivVehicles = _MenuPool:AddSubMenu(CivMenu, 'Vehicles', '', true)
             CivVehicles:SetMenuWidthOffset(Config.MenuWidth)
             
-			for k, v in pairs(Config.CivVehicles) do
-                local CivVehicle = NativeUI.CreateItem(v.name, '')
+			for _, Vehicle in pairs(Config.CivVehicles) do
+                local CivVehicle = NativeUI.CreateItem(Vehicle.name, '')
                 CivVehicles:AddItem(CivVehicle)
                 if Config.ShowCivSpawnCode then
-                    CivVehicle:RightLabel(v.spawncode)
+                    CivVehicle:RightLabel(Vehicle.spawncode)
                 end
                 CivVehicle.Activated = function(ParentMenu, SelectedItem)
-                    SpawnVehicle(v.spawncode, v.name)
+                    SpawnVehicle(Vehicle.spawncode, Vehicle.name)
                 end
             end
         end
@@ -681,8 +675,8 @@ end
 
 
 local EmotesList = {}
-for k, v in pairs(Config.EmotesList) do
-    table.insert(EmotesList, v.name)
+for _, Emote in pairs(Config.EmotesList) do
+    table.insert(EmotesList, Emote.name)
 end
 
 function Emotes(menu)
@@ -691,9 +685,9 @@ function Emotes(menu)
     
     menu.OnListSelect = function(sender, item, index)
         if item == EmotesMenu then
-            for k, v in pairs(Config.EmotesList) do
-                if v.name == item:IndexToItem(index) then
-                    PlayEmote(v.emote, v.name)
+            for _, Emote in pairs(Config.EmotesList) do
+                if Emote.name == item:IndexToItem(index) then
+                    PlayEmote(Emote.emote, Emote.name)
                 end
             end
         end

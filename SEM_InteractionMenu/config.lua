@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.0 (Nov 2019)
+	Current Version: v1.1 (Dec 2019)
 	
 	Support: https://semdevelopment.com/discord
 

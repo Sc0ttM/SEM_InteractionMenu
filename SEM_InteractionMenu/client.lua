@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.0 (Nov 2019)
+	Current Version: v1.1 (Dec 2019)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -348,12 +348,12 @@ end)
 Citizen.CreateThread(function()
     local Index = 0
     local Emotes = ''
-    for k, v in pairs(Config.EmotesList) do
+    for _, Emote in pairs(Config.EmotesList) do
         Index = Index + 1
         if Index == 1 then
-            Emotes = Emotes .. v.name
+            Emotes = Emotes .. Emote.name
         else
-            Emotes = Emotes .. ', ' .. v.name
+            Emotes = Emotes .. ', ' .. Emote.name
         end
     end
 
@@ -526,12 +526,12 @@ end)
 RegisterCommand('emotes', function(source, args, rawCommands)
     local Index = 0
     local Emotes = ''
-    for k, v in pairs(Config.EmotesList) do
+    for _, Emote in pairs(Config.EmotesList) do
         Index = Index + 1
         if Index == 1 then
-            Emotes = Emotes .. v.name
+            Emotes = Emotes .. Emote.name
         else
-            Emotes = Emotes .. ', ' .. v.name
+            Emotes = Emotes .. ', ' .. Emote.name
         end
     end
 
@@ -541,9 +541,9 @@ end)
 RegisterCommand('emote', function(source, args, rawCommands)
     local SelectedEmote = args[1]
 
-    for k, v in pairs(Config.EmotesList) do
-        if v.name == SelectedEmote then
-            PlayEmote(v.emote, v.name)
+    for _, Emote in pairs(Config.EmotesList) do
+        if Emote.name == SelectedEmote then
+            PlayEmote(Emote.emote, Emote.name)
             return
         end
     end
