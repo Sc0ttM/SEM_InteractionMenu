@@ -10,4 +10,6 @@ Some menu features also have commands out of ease during RP.
 ### Information:
 Current Version: **v1.0**
 
+Support/Discord: https://semdevelopment.com/discord
+
 Information/Instructions: https://semdevelopment.com/releases/interactionmenu
