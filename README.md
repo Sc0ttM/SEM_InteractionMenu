@@ -14,6 +14,7 @@ Current Version: **v1.2**
 
 Changes: Small Improvements, BAC Levels, Player Inventory & OneSync Compatability (Hopefully, Unable to test this)
 
+
 Support/Discord: https://semdevelopment.com/discord
 
 Information/Instructions: https://semdevelopment.com/releases/interactionmenu
