@@ -10,7 +10,9 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.1**
+Current Version: **v1.2**
+
+Changes: Small Improvements, BAC Levels, Player Inventory & OneSync Compatability (Hopefully, Unable to test this)
 
 Support/Discord: https://semdevelopment.com/discord
 
