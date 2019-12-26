@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.1 (Dec 2019)
+	Current Version: v1.2 (Dec 2019)
 	
 	Support: https://semdevelopment.com/discord
 
@@ -30,9 +30,51 @@ Config.MenuOrientation = 0
 --Button = 0 [Default]  |  Command = 1
 Config.OpenMenu = 0
 
+--This determines what command will be used to open the menu when command is selected
+Config.Command = 'semmenu'
 
 
 
+
+
+--This determines the title of the menu
+--Defaul        = The Default title of the menu is 'Interaction Menu'
+--Player Name   = This is the name of the player
+--Custom        = What ever you define below
+--Default = 0 [Default] | Player Name = 1 | Custom = 2
+Config.MenuTitle = 0
+
+--This determines the custom title of the menu if selected above
+Config.MenuTitleCustom = 'Custom Menu Title'
+
+
+
+
+
+--This determines who has access to the LEO menu
+--!!! NOTE: If LEO Peds is selected, peds in the 'Config.LEOUniforms' will have access to the LEO Menu !!!
+--Everyone = 0 [Default] | LEO Peds = 1 | Onduty Command = 2 | Ace Permissions = 3
+Config.LEOAccess = 0
+
+--This determines when you unrack a weapon if it prevents you from changing it
+Config.UnrackConstant = true
+
+--These are the props that are available through the Prop Spawner in the LEO Menu
+Config.LEOProps = {
+    --[[
+        EXAMPLE: 
+		{name = 'a', spawncode = 'b'},
+        ────────────────────────────────────────────────────────────────
+        'a' is the title that shows in the menu
+        'b' is the spawn code for prop that will be spawned
+    ]]
+    {name = 'Police Barrier', spawncode = 'prop_barrier_work05'},
+    {name = 'Barrier', spawncode = 'prop_barrier_work06a'},
+    {name = 'Traffic Cone', spawncode = 'prop_roadcone01a'},
+    {name = 'Work Barrier', spawncode = 'prop_mp_barrier_02b'},
+    {name = 'Work Barrier 2', spawncode = 'prop_barrier_work01a'},
+    {name = 'Lighting', spawncode = 'prop_worklight_03b'},
+}
 
 --These are unfiforms that are available through the LEO Loadout Menu 
 Config.LEOUniforms = {
@@ -43,12 +85,49 @@ Config.LEOUniforms = {
         'a' is the title that shows in the menu
         'b' is the spawn code for uniform that will be spawned
     ]]
-    {name = 'Clear', spawncode = 'a_m_y_skater_01'},
     {name = 'LSPD', spawncode = 's_m_y_cop_01'},
     {name = 'BCSO', spawncode = 's_m_y_sheriff_01'},
     {name = 'SAHP', spawncode = 's_m_y_hwaycop_01'},
     {name = 'SWAT', spawncode = 's_m_y_swat_01'},
     {name = 'Undercover', spawncode = 's_m_m_ciasec_01'},
+}
+
+--[[
+    EXAMPLE: 
+	a = {
+		{weapon = 'b', components = 'c', 'c'},
+	},
+    ────────────────────────────────────────────────────────────────
+    'a' is the title of the Loadout
+    'b' is the weapon which you want to be added [A link to weapon names can be found below]
+	'c' is the components which you want to be added to the weapon [A link to available weapon components can be found below]
+
+	Weapon Names   https://forum.fivem.net/t/list-of-weapon-spawn-names-after-hours/90750
+	Weapon Components   https://wiki.rage.mp/index.php?title=Weapons_Components
+]]
+Config.LEOLoadouts = {
+	['Standard'] = {
+		{weapon = 'weapon_flashlight', components = {''}},
+		{weapon = 'weapon_combatpistol', components = {'component_at_pi_flsh'}},
+		{weapon = 'weapon_stungun', components = {''}},
+		{weapon = 'weapon_carbinerifle', components = {'component_at_ar_flsh', 'component_at_scope_medium', 'component_at_ar_afgrip'}},
+		{weapon = 'weapon_pumpshotgun', components = {'component_at_ar_flsh'}},
+		{weapon = 'weapon_fireextinguisher', components = {''}},
+		{weapon = 'weapon_flare', components = {''}},
+	},
+
+	['SWAT'] = {
+		{weapon = 'weapon_flashlight', components = {''}},
+		{weapon = 'weapon_combatpistol', components = {'component_at_pi_flsh'}},
+		{weapon = 'weapon_stungun', components = {''}},
+		{weapon = 'weapon_smg', components = {'component_at_ar_flsh', 'component_ar_scope_macro_02'}},
+		{weapon = 'weapon_carbinerifle', components = {'component_at_ar_flsh', 'component_at_scope_medium', 'component_at_ar_afgrip'}},
+		{weapon = 'weapon_pumpshotgun', components = {'component_at_ar_flsh'}},
+		{weapon = 'weapon_sniperrifle', components = {'comonent_at_scope_max'}},
+		{weapon = 'weapon_bzgas', components = {''}},
+		{weapon = 'weapon_fireextinguisher', components = {''}},
+		{weapon = 'weapon_flare', components = {''}},
+	}
 }
 
 --This determines if the vehicle spawn section shows for the LEO Menu
@@ -61,7 +140,7 @@ Config.ShowLEOSpawnCode = true
 Config.LEOVehiclesCategories = {
 	--[[
         EXAMPLE: 
-		a = {
+		['a'] = {
 		    {name = 'b', spawncode = 'c'},
 		}
         ────────────────────────────────────────────────────────────────
@@ -71,24 +150,19 @@ Config.LEOVehiclesCategories = {
     ]]
 	
 	--This is a Category that will show in the LEO Vehicle Menu - These categories sometimes does order correctly
-    LSPD = {
+    ['LSPD'] = {
 		--These are the Vehicles that will show in the Category and there spawn codes
 		{name = 'Police', spawncode = 'police'},
 		{name = 'Police', spawncode = 'police2'},
 		{name = 'Police', spawncode = 'police3'},
 	},
 	
-	BCSO = {
+	['BCSO'] = {
 		{name = 'Sheriff', spawncode = 'sheriff'},
 		{name = 'Sheriff', spawncode = 'sheriff2'},
 	},
-    
-    SAHP = {
-        {name = 'Highway', spawncode = 'police'},
-        {name = 'Highway', spawncode = 'police'},
-    },
 
-    Unmarked = {
+    ['Unmarked'] = {
         {name = 'Unmarked', spawncode = 'police4'},
     },
 }
@@ -96,6 +170,11 @@ Config.LEOVehiclesCategories = {
 
 
 
+
+--This determines who has access to the Fire menu
+--!!! NOTE: If Fire Peds is selected, peds in the 'Config.FireUniforms' will have access to the Fire Menu !!!
+--Everyone = 0 [Default] | Fire Peds = 1 | Onduty Command = 2 | Ace Permissions = 3
+Config.FireAccess = 0
 
 --These are unfiforms that are available through the Fire Loadout Menu 
 Config.FireUniforms = {
@@ -106,7 +185,6 @@ Config.FireUniforms = {
         'a' is the title that shows in the menu
         'b' is the spawn code for uniform that will be spawned
     ]]
-    {name = 'Clear', spawncode = 'a_m_y_skater_01'},
     {name = 'Firefighter', spawncode = 's_m_y_fireman_01'},
     {name = 'Paramedic', spawncode = 's_m_m_paramedic_01'},
 }
@@ -193,6 +271,10 @@ Config.CivAdverts = {
 
 
 
+
+--This determines when people have access vehicle menu
+--All the Time = 0 [Default] | When in Vehicle = 1
+Config.VehicleAccess = 0
 
 --This determines if Vehicle Repair/Clean/Delete options apprear in the Vehicle Menu
 Config.VehicleOptions = true

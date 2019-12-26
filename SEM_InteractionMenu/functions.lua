@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.1 (Dec 2019)
+	Current Version: v1.2 (Dec 2019)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -256,4 +256,69 @@ function CancelEmote()
     ClearPedTasks(GetPlayerPed(-1))
     Notify('~r~Stopping Emote')
     EmotePlaying = false
+end
+
+
+
+--Menu Restrictions
+function LEORestrict()
+    if Config.LEOAccess == 0 then
+        return true
+    elseif Config.LEOAccess == 1 then
+        local Ped = GetEntityModel(GetPlayerPed(-1))
+
+        for _, LEOPeds in pairs(Config.LEOUniforms) do
+            local AllowedPed = GetHashKey(LEOPeds.spawncode)
+
+            if Ped == AllowedPed then
+                return true
+            end
+        end
+    elseif Config.LEOAccess == 2 then
+        return LEOOnduty
+    elseif Config.LEOAccess == 3 then
+        return LEOAce
+    else
+        return true
+    end
+end
+
+
+
+function FireRestrict()
+    if Config.FireAccess == 0 then
+        return true
+    elseif Config.FireAccess == 1 then
+        local Ped = GetEntityModel(GetPlayerPed(-1))
+
+        for _, FirePeds in pairs(Config.FireUniforms) do
+            local AllowedPed = GetHashKey(FirePeds.spawncode)
+
+            if Ped == AllowedPed then
+                return true
+            end
+        end
+    elseif Config.FireAccess == 2 then
+        return FireOnduty
+    elseif Config.FireAccess == 3 then
+        return FireAce
+    else
+        return true
+    end
+end
+
+
+
+function VehicleRestrict()
+    if Config.VehicleAccess == 0 then
+        return true
+    elseif Config.VehicleAccess == 1 then
+        if IsPedInAnyVehicle(GetPlayerPed(PlayerId()), false) then
+            return true
+        else
+            return false
+        end
+    else
+        return true
+    end
 end

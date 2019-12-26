@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.1 (Dec 2019)
+	Current Version: v1.2 (Dec 2019)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -10,7 +10,6 @@
 	DO NOT EDIT THIS IF YOU DON'T KNOW WHAT YOU ARE DOING
 	
 ───────────────────────────────────────────────────────────────
-
 ]]
 
 
@@ -45,6 +44,49 @@ AddEventHandler('SEM_Ads', function(Text, Name, Loc, File)
     TriggerClientEvent('SEM_SyncAds', -1, Text, Name, Loc, File)
 end)
 
+BACList = {}
+RegisterServerEvent('SEM_BACSet')
+AddEventHandler('SEM_BACSet', function(BACLevel)
+	BACList[source] = BACLevel
+end)
+
+RegisterServerEvent('SEM_BACTest')
+AddEventHandler('SEM_BACTest', function(ID)
+	local BACLevel = BACList[ID]
+	TriggerClientEvent('SEM_BACResult', source, BACLevel)
+end)
+
+Inventories = {}
+RegisterServerEvent('SEM_InventorySet')
+AddEventHandler('SEM_InventorySet', function(Items)
+	Inventories[source] = Items
+end)
+
+RegisterServerEvent('SEM_InventorySearch')
+AddEventHandler('SEM_InventorySearch', function(ID)
+	local Inventory = Inventories[ID]
+
+	TriggerClientEvent('SEM_InventoryResult', source, Inventory)
+end)
+
+RegisterServerEvent('SEM_LEOPerms')
+AddEventHandler('SEM_LEOPerms', function()
+    if IsPlayerAceAllowed(source, 'sem.leo') then
+		TriggerClientEvent('SEM_LEOPermsResult', source, true)
+	else
+		TriggerClientEvent('SEM_LEOPermsResult', source, false)
+	end
+end)
+
+RegisterServerEvent('SEM_FirePerms')
+AddEventHandler('SEM_FirePerms', function()
+    if IsPlayerAceAllowed(source, 'sem.fire') then
+		TriggerClientEvent('SEM_FirePermsResult', source, true)
+	else
+		TriggerClientEvent('SEM_FirePermsResult', source, false)
+	end
+end)
+
 
 
 Citizen.CreateThread(function()
@@ -66,7 +108,7 @@ Citizen.CreateThread(function()
 				if Data.Changes ~= '' then
 					print('\nChanges: ' .. Data.Changes)
 				end
-				print('\n--------------------------------------------------------------------------\n')
+				print('\n--------------------------------------------------------------------------\n^7')
 			elseif tonumber(CurrentVersion) > tonumber(Data.NewestVersion) then
 				print('^3Your version of SEM_InteractionMenu is higher than the current version!^7')
 			else

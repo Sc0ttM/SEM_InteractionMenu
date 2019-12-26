@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.1 (Dec 2019)
+	Current Version: v1.2 (Dec 2019)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -84,17 +84,17 @@ end)
 Citizen.CreateThread(function()
     while true do
       Wait(0)
-          if Drag then
+        if Drag then
               local Ped = GetPlayerPed(GetPlayerFromServerId(OfficerDrag))
               local Ped2 = PlayerPedId()
               AttachEntityToEntity(Ped2, Ped, 4103, 11816, 0.48, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
               StillDragged = true
-          else
+        else
               if(StillDragged) then
                   DetachEntity(PlayerPedId(), true, false)
                   StillDragged = false
               end
-          end
+        end
     end
 end)
 
@@ -164,7 +164,6 @@ AddEventHandler('SEM_Spikes:DeleteSpikes', function(NetID)
     Citizen.CreateThread(function()
         local Spike = NetworkGetEntityFromNetworkId(NetID)
         DeleteEntity(Spike)
-        Notify('~r~Spikes Strips Removed!')
     end)
 end)
 
@@ -261,6 +260,7 @@ function RemoveSpikes()
     for a = 1, #SpawnedSpikes do
         TriggerServerEvent('SEM_Spikes:TriggerDeleteSpikes', SpawnedSpikes[a])
     end
+    Notify('~r~Spikes Strips Removed!')
     SpawnedSpikes = {}
 end
 
@@ -281,14 +281,20 @@ Citizen.CreateThread(function()
             if (tostring(CurrentWeapon) ~= '-2084633992') and Veh == nil then
                 Notify('~y~You must put away your Carbine Rifle')
             end
-            SetCurrentPedWeapon(Ped, 'weapon_carbinerifle', true)			
+
+            if Config.UnrackConstant then
+                SetCurrentPedWeapon(Ped, 'weapon_carbinerifle', true)
+            end
         end
         
         if ShotgunEquipped then
             if tostring(CurrentWeapon) ~= '487013001' and Veh == nil then
                 Notify('~y~You must put away your Shotgun')
             end
-            SetCurrentPedWeapon(Ped, 'weapon_pumpshotgun', true)
+
+            if Config.UnrackConstant then
+                SetCurrentPedWeapon(Ped, 'weapon_pumpshotgun', true)
+            end
         end
     end
 end)
@@ -305,8 +311,8 @@ AddEventHandler('SEM_Object:SpawnObjects', function(ObjectName, Name)
 
     local SpawnCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()) , 0.0, 0.5, 0.0)
     
-    local Object = CreateObject(GetHashKey(ObjectName), SpawnCoords.x, SpawnCoords.y, SpawnCoords.z, 1, 1, 1)
-    local NetID = NetworkGetNetworkIdFromEntity(Spike)
+    local Object = CreateObject(GetHashKey(ObjectName), SpawnCoords.x, SpawnCoords.y, SpawnCoords.z, true, true, true)
+    local NetID = NetworkGetNetworkIdFromEntity(Object)
     SetNetworkIdExistsOnAllMachines(NetID, true)
     SetNetworkIdCanMigrate(NetID, false)
     SetEntityHeading(Object, GetEntityHeading(GetPlayerPed(PlayerId()) ))
@@ -321,6 +327,63 @@ end)
 RegisterNetEvent('SEM_SyncAds')
 AddEventHandler('SEM_SyncAds',function(Text, Name, Loc, File)
     Ad(Text, Name, Loc, File)
+end)
+
+
+
+--Inventory
+RegisterNetEvent('SEM_InventoryResult')
+AddEventHandler('SEM_InventoryResult', function(Inventory)
+    Citizen.Wait(5000)
+
+    if Inventory ==  nil then
+        Inventory = 'Empty'
+    end
+
+    Notify('~b~Inventory Items: ~g~' .. Inventory)
+end)
+
+
+
+--BAC
+RegisterNetEvent('SEM_BACResult')
+AddEventHandler('SEM_BACResult', function(BACLevel)
+    Citizen.Wait(5000)
+
+    if BACLevel == nil then
+        BACLevel = 0.00
+    end
+
+    if tonumber(BACLevel) < 0.08 then
+        Notify('~b~BAC Level: ~g~' .. tostring(BACLevel))
+    else
+        Notify('~b~BAC Level: ~r~' .. tostring(BACLevel))
+    end
+end)
+
+
+
+--Permissions
+LEOAce = false
+TriggerServerEvent('SEM_LEOPerms')
+RegisterNetEvent('SEM_LEOPermsResult')
+AddEventHandler('SEM_LEOPermsResult', function(Allowed)
+    if Allowed then
+        LEOAce = true
+    else
+        LEOAce = false
+    end
+end)
+
+FireAce = false
+TriggerServerEvent('SEM_FirePerms')
+RegisterNetEvent('SEM_FirePermsResult')
+AddEventHandler('SEM_FirePermsResult', function(Allowed)
+    if Allowed then
+        FireAce = true
+    else
+        FireAce = false
+    end
 end)
 
 
@@ -362,11 +425,29 @@ Citizen.CreateThread(function()
     TriggerEvent('chat:addSuggestion', '/trunk', 'Toggles Vehicle\'s Trunk')
     TriggerEvent('chat:addSuggestion', '/clear', 'Clears all Weapons')
     TriggerEvent('chat:addSuggestion', '/emotes', 'List of Current Avaliable Emotes')
-    TriggerEvent('chat:addSuggestion', '/emote', 'Play Emote', {{name='Emote Name', help='Emotes: ' .. Emotes}})
-    TriggerEvent('chat:addSuggestion', '/cuff', 'Cuff Player', {{name='ID', help='Players Server ID'}})
-    TriggerEvent('chat:addSuggestion', '/drag', 'Drag Player', {{name='ID', help='Players Server ID'}})
+    TriggerEvent('chat:addSuggestion', '/emote', 'Play Emote', {{name = 'Emote Name', help = 'Emotes: ' .. Emotes}})
+    TriggerEvent('chat:addSuggestion', '/cuff', 'Cuff Player', {{name = 'ID', help = 'Players Server ID'}})
+    TriggerEvent('chat:addSuggestion', '/drag', 'Drag Player', {{name = 'ID', help = 'Players Server ID'}})
     TriggerEvent('chat:addSuggestion', '/dropweapon', 'Drops Weapon in Hand')
     TriggerEvent('chat:addSuggestion', '/loadout', 'Equips LEO Weapon Loadout')
+
+    if Config.LEOAccess == 2 or Config.FireAccess == 2 then
+        TriggerEvent('chat:AddSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}})
+    end
+end)
+
+LEOOnduty = false
+FireOnduty = false
+RegisterCommand('onduty', function(source, args, rawCommands)
+    if Config.LEOAccess == 2 or Config.FireAccess == 2 then
+        if args[1] == 'LEO' then
+            LEOOnduty = not LEOOnduty
+        elseif args[1] == 'Fire' then
+            FireOnduty = not FireOnduty
+        else
+            Notify('~r~Invalid Department!')
+        end
+    end
 end)
 
 RegisterCommand('cuff', function(source, args, rawCommands)
@@ -379,7 +460,7 @@ RegisterCommand('cuff', function(source, args, rawCommands)
         ShortestDistance = 2
         ClosestId = 0
 
-        for ID = 0, 32 do
+        for ID = 0, 128 do
             if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
                 Ped2 = GetPlayerPed(ID)
                 local x, y, z = table.unpack(GetEntityCoords(Ped))
@@ -409,7 +490,7 @@ RegisterCommand('drag', function(source, args, rawCommands)
         ShortestDistance = 2
         ClosestId = 0
 
-        for ID = 0, 32 do
+        for ID = 0, 128 do
             if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
                 Ped2 = GetPlayerPed(ID)
                 local x, y, z = table.unpack(GetEntityCoords(Ped))
