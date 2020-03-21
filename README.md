@@ -14,10 +14,8 @@ Current Version: **v1.3**
 
 Changes: **Small Improvements, LEO Backup, Station TP & Waypoints, Jail & Hospital, Police Radar & More**
 
-*For full changes checkout https://semdevelopment.com/releases/interactionmenu/changelog*
-
-
-
 Support/Discord: https://semdevelopment.com/discord
 
 Information/Instructions: https://semdevelopment.com/releases/interactionmenu
+
+*For full changes checkout https://semdevelopment.com/releases/interactionmenu/changelog*
