@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.2 (Dec 2019)
+	Current Version: v1.3 (Mar 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -103,6 +103,15 @@ function DisableShield()
     SetEnableHandcuffs(Ped, false)
     HadPistol = false
     ShieldActive = false
+end
+
+function GotRadar()
+    local RadarFiles = LoadResourceFile(Config.RadarName, '__resource.lua')
+    if RadarFiles then
+        return true
+    else
+        return false
+    end
 end
 
 

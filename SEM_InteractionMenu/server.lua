@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.2 (Dec 2019)
+	Current Version: v1.3 (Mar 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -14,76 +14,108 @@
 
 
 
-RegisterServerEvent('SEM_CuffNear')
-AddEventHandler('SEM_CuffNear', function(ID)
-    TriggerClientEvent('SEM_Cuff', ID)
+RegisterServerEvent('SEM_InteractionMenu:GlobalChat')
+AddEventHandler('SEM_InteractionMenu:GlobalChat', function(Color, Prefix, Message)
+	TriggerClientEvent('chatMessage', -1, Prefix, Color, Message)
 end)
 
-RegisterServerEvent('SEM_DragNear')
-AddEventHandler('SEM_DragNear', function(ID)
+RegisterServerEvent('SEM_InteractionMenu:CuffNear')
+AddEventHandler('SEM_InteractionMenu:CuffNear', function(ID)
+    TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:DragNear')
+AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
 	TriggerClientEvent('Drag', ID, source)
 end)
 
-RegisterServerEvent('SEM_SeatNear')
-AddEventHandler('SEM_SeatNear', function(ID, Vehicle)
-    TriggerClientEvent('SEM_Seat', ID, Vehicle)
+RegisterServerEvent('SEM_InteractionMenu:SeatNear')
+AddEventHandler('SEM_InteractionMenu:SeatNear', function(ID, Vehicle)
+    TriggerClientEvent('SEM_InteractionMenu:Seat', ID, Vehicle)
 end)
 
-RegisterServerEvent('SEM_UnseatNear')
-AddEventHandler('SEM_UnseatNear', function(ID, Vehicle)
-    TriggerClientEvent('SEM_Unseat', ID, Vehicle)
+RegisterServerEvent('SEM_InteractionMenu:UnseatNear')
+AddEventHandler('SEM_InteractionMenu:UnseatNear', function(ID, Vehicle)
+    TriggerClientEvent('SEM_InteractionMenu:Unseat', ID, Vehicle)
 end)
 
-RegisterServerEvent('SEM_Spikes:TriggerDeleteSpikes')
-AddEventHandler('SEM_Spikes:TriggerDeleteSpikes', function(NetID)
-    TriggerClientEvent('SEM_Spikes:DeleteSpikes', -1, NetID)
+RegisterServerEvent('SEM_InteractionMenu:Spikes-TriggerDeleteSpikes')
+AddEventHandler('SEM_InteractionMenu:Spikes-TriggerDeleteSpikes', function(NetID)
+    TriggerClientEvent('SEM_InteractionMenu:Spikes-DeleteSpikes', -1, NetID)
 end)
 
-RegisterServerEvent('SEM_Ads')
-AddEventHandler('SEM_Ads', function(Text, Name, Loc, File)
-    TriggerClientEvent('SEM_SyncAds', -1, Text, Name, Loc, File)
+RegisterServerEvent('SEM_InteractionMenu:Jail')
+AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
+	TriggerClientEvent('SEM_InteractionMenu:JailPlayer', ID, Time)
+	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' seconds')
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:Unjail')
+AddEventHandler('SEM_InteractionMenu:Unjail', function(ID)
+	TriggerClientEvent('SEM_InteractionMenu:UnjailPlayer', ID)
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:Backup')
+AddEventHandler('SEM_InteractionMenu:Backup', function(Code, StreetName, Coords)
+	TriggerClientEvent('SEM_InteractionMenu:CallBackup', -1, Code, StreetName, Coords)
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:Ads')
+AddEventHandler('SEM_InteractionMenu:Ads', function(Text, Name, Loc, File)
+    TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File)
 end)
 
 BACList = {}
-RegisterServerEvent('SEM_BACSet')
-AddEventHandler('SEM_BACSet', function(BACLevel)
+RegisterServerEvent('SEM_InteractionMenu:BACSet')
+AddEventHandler('SEM_InteractionMenu:BACSet', function(BACLevel)
 	BACList[source] = BACLevel
 end)
 
-RegisterServerEvent('SEM_BACTest')
-AddEventHandler('SEM_BACTest', function(ID)
+RegisterServerEvent('SEM_InteractionMenu:BACTest')
+AddEventHandler('SEM_InteractionMenu:BACTest', function(ID)
 	local BACLevel = BACList[ID]
-	TriggerClientEvent('SEM_BACResult', source, BACLevel)
+	TriggerClientEvent('SEM_InteractionMenu:BACResult', source, BACLevel)
 end)
 
 Inventories = {}
-RegisterServerEvent('SEM_InventorySet')
-AddEventHandler('SEM_InventorySet', function(Items)
+RegisterServerEvent('SEM_InteractionMenu:InventorySet')
+AddEventHandler('SEM_InteractionMenu:InventorySet', function(Items)
 	Inventories[source] = Items
 end)
 
-RegisterServerEvent('SEM_InventorySearch')
-AddEventHandler('SEM_InventorySearch', function(ID)
+RegisterServerEvent('SEM_InteractionMenu:InventorySearch')
+AddEventHandler('SEM_InteractionMenu:InventorySearch', function(ID)
 	local Inventory = Inventories[ID]
 
-	TriggerClientEvent('SEM_InventoryResult', source, Inventory)
+	TriggerClientEvent('SEM_InteractionMenu:InventoryResult', source, Inventory)
 end)
 
-RegisterServerEvent('SEM_LEOPerms')
-AddEventHandler('SEM_LEOPerms', function()
+RegisterServerEvent('SEM_InteractionMenu:Hospitalize')
+AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time)
+	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time)
+	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' seconds')
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:Unhospitalize')
+AddEventHandler('SEM_InteractionMenu:Unhospitalize', function(ID)
+	TriggerClientEvent('SEM_InteractionMenu:UnhospitalizePlayer', ID)
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:LEOPerms')
+AddEventHandler('SEM_InteractionMenu:LEOPerms', function()
     if IsPlayerAceAllowed(source, 'sem.leo') then
-		TriggerClientEvent('SEM_LEOPermsResult', source, true)
+		TriggerClientEvent('SEM_InteractionMenu:LEOPermsResult', source, true)
 	else
-		TriggerClientEvent('SEM_LEOPermsResult', source, false)
+		TriggerClientEvent('SEM_InteractionMenu:LEOPermsResult', source, false)
 	end
 end)
 
-RegisterServerEvent('SEM_FirePerms')
-AddEventHandler('SEM_FirePerms', function()
+RegisterServerEvent('SEM_InteractionMenu:FirePerms')
+AddEventHandler('SEM_InteractionMenu:FirePerms', function()
     if IsPlayerAceAllowed(source, 'sem.fire') then
-		TriggerClientEvent('SEM_FirePermsResult', source, true)
+		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, true)
 	else
-		TriggerClientEvent('SEM_FirePermsResult', source, false)
+		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, false)
 	end
 end)
 
