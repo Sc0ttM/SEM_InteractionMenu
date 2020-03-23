@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.3.1 (Mar 2020)
+	Current Version: v1.4 (Mar 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -132,6 +132,10 @@ Citizen.CreateThread(function()
 		if err == 200 then
 			local Data = json.decode(response)
 			if tonumber(CurrentVersion) < tonumber(Data.NewestVersion) then
+				print('Current: ' .. CurrentVersion .. '\nNewest Version: ' .. Data.NewestVersion .. '  NOT AVAILABLE')
+			end
+			
+			if CurrentVersion < Data.NewestVersion then
 				print('\n--------------------------------------------------------------------------')
 				print('\nSEM_InteractionMenu is outdated!')
 				print('Current Version: ^2' .. Data.NewestVersion .. '^7')
