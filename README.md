@@ -12,7 +12,7 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 ### Information:
 Current Version: **v1.3**
 
-Changes: **Fixed Jail & Hospital Config Option Not Working**
+Changes: **Fixed Jail & Hospital Config Option Operating Incorrectly**
 
 Support/Discord: https://semdevelopment.com/discord
 
