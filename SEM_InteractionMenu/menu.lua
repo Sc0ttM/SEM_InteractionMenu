@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (menu.lua) - Created by Scott M
-	Current Version: v1.3 (Mar 2020)
+	Current Version: v1.3.1 (Mar 2020)
 	
 	Support | https://semdevelopment.com/discord
 	
@@ -90,7 +90,9 @@ function Menu()
                 LEOActions:AddItem(Radar)
                 LEOActions:AddItem(Inventory)
                 LEOActions:AddItem(BAC)
-                LEOActions:AddItem(Jail)
+				if Config.LEOJail then
+					LEOActions:AddItem(Jail)
+				end
                 LEOActions:AddItem(Spikes)
                 LEOActions:AddItem(Shield)
                 LEOActions:AddItem(CarbineRifle)
@@ -499,7 +501,9 @@ function Menu()
                 FireActions:AddItem(Drag)
                 FireActions:AddItem(Seat)
                 FireActions:AddItem(Unseat)
-                FireActions:AddItem(Hospitalize)
+				if Config.FireHospital then
+					FireActions:AddItem(Hospitalize)
+				end
                 Drag.Activated = function(ParentMenu, SelectedItem)
                     local Ped = GetPlayerPed(-1)
 
