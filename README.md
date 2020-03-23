@@ -12,7 +12,7 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 ### Information:
 Current Version: **v1.3**
 
-Changes: **Small Improvements, LEO Backup, Station TP & Waypoints, Jail & Hospital, Police Radar & More**
+Changes: **Fixed Jail & Hospital Config Option Not Working**
 
 Support/Discord: https://semdevelopment.com/discord
 
