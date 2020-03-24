@@ -1063,7 +1063,7 @@ Citizen.CreateThread(function()
 		Citizen.Wait(0)
 		
 		_MenuPool:ProcessMenus()	
-		--_MenuPool:ControlDisablingEnabled(false)
+		_MenuPool:ControlDisablingEnabled(false)
 		_MenuPool:MouseControlsEnabled(false)
 		
 		if IsControlJustPressed(1, Config.MenuButton) and GetLastInputMethod(2) then
