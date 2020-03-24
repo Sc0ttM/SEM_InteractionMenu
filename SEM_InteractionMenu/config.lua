@@ -248,6 +248,12 @@ Config.LEOLoadouts = {
 --This determines if the LEO vehicles section if available
 Config.ShowLEOVehicles = true
 
+--This determines if the LEO Loadouts and Uniforms sections will be available.
+Config.ShowLEOLoadouts = true
+
+--This determines if the LEO Uniforms section will be shown, assuming the above is true.
+Config.ShowLEOUniforms = true
+
 --This determines if the vehicle spawn codes are displayed next to the name
 Config.ShowLEOSpawnCode = true
 
