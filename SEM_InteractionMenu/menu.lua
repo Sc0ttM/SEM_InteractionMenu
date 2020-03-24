@@ -416,55 +416,59 @@ function Menu()
                     end
             end
 
-            local LEOLoadouts = _MenuPool:AddSubMenu(LEOMenu, 'Loadouts', '', true)
-            LEOLoadouts:SetMenuWidthOffset(Config.MenuWidth)
-                UniformsList = {}
-                for _, Uniform in pairs(Config.LEOUniforms) do
-                    table.insert(UniformsList, Uniform.name)
-                end
-                
-                LoadoutsList = {}
-                for Name, Loadout in pairs(Config.LEOLoadouts) do
-					table.insert(LoadoutsList, Name)
-                end
+            if Config.ShowLEOLoadouts then
+                local LEOLoadouts = _MenuPool:AddSubMenu(LEOMenu, 'Loadouts', '', true)
+                LEOLoadouts:SetMenuWidthOffset(Config.MenuWidth)
+                    UniformsList = {}
+                    for _, Uniform in pairs(Config.LEOUniforms) do
+                        table.insert(UniformsList, Uniform.name)
+                    end
+                    
+                    LoadoutsList = {}
+                    for Name, Loadout in pairs(Config.LEOLoadouts) do
+                        table.insert(LoadoutsList, Name)
+                    end
 
-                local Uniforms = NativeUI.CreateListItem('Uniforms', UniformsList, 1, 'Spawn Uniforms')
-                local Loadouts = NativeUI.CreateListItem('Loadouts', LoadoutsList, 1, 'Spawns LEO Loadouts')
-                LEOLoadouts:AddItem(Uniforms)
-                LEOLoadouts:AddItem(Loadouts)
-                LEOLoadouts.OnListSelect = function(sender, item, index)
-                    if item == Uniforms then
-                        for _, Uniform in pairs(Config.LEOUniforms) do
-                            if Uniform.name == item:IndexToItem(index) then
-                                LoadPed(Uniform.spawncode)
-                                Notify('~b~Uniform Spawned: ~g~' .. Uniform.name)
+                    local Uniforms = NativeUI.CreateListItem('Uniforms', UniformsList, 1, 'Spawn Uniforms')
+                    local Loadouts = NativeUI.CreateListItem('Loadouts', LoadoutsList, 1, 'Spawns LEO Loadouts')
+                    if Config.ShowLEOUniforms then
+                        LEOLoadouts:AddItem(Uniforms)
+                    end
+                    LEOLoadouts:AddItem(Loadouts)
+                    LEOLoadouts.OnListSelect = function(sender, item, index)
+                        if item == Uniforms then
+                            for _, Uniform in pairs(Config.LEOUniforms) do
+                                if Uniform.name == item:IndexToItem(index) then
+                                    LoadPed(Uniform.spawncode)
+                                    Notify('~b~Uniform Spawned: ~g~' .. Uniform.name)
+                                end
+                            end
+                        end
+
+
+
+                        if item == Loadouts then
+                            for Name, Loadout in pairs(Config.LEOLoadouts) do
+                                if Name == item:IndexToItem(index) then
+                                    SetEntityHealth(GetPlayerPed(-1), 200)
+                                    RemoveAllPedWeapons(GetPlayerPed(-1), true)
+                                    AddArmourToPed(GetPlayerPed(-1), 100)
+
+                                    for _, Weapon in pairs(Loadout) do
+                                        GiveWeapon(Weapon.weapon)
+                                                                
+                                        for _, Component in pairs(Weapon.components) do
+                                            AddWeaponComponent(Weapon.weapon, Component)
+                                        end
+                                    end
+
+                                    Notify('~b~Loadout Spawned: ~g~' .. Name)
+                                end
                             end
                         end
                     end
-
-
-
-                    if item == Loadouts then
-                        for Name, Loadout in pairs(Config.LEOLoadouts) do
-							if Name == item:IndexToItem(index) then
-								SetEntityHealth(GetPlayerPed(-1), 200)
-								RemoveAllPedWeapons(GetPlayerPed(-1), true)
-								AddArmourToPed(GetPlayerPed(-1), 100)
-
-								for _, Weapon in pairs(Loadout) do
-									GiveWeapon(Weapon.weapon)
-															
-									for _, Component in pairs(Weapon.components) do
-										AddWeaponComponent(Weapon.weapon, Component)
-									end
-								end
-
-								Notify('~b~Loadout Spawned: ~g~' .. Name)
-							end
-                        end
-                    end
                 end
-
+            
             if Config.ShowLEOVehicles then
                 local LEOVehicles = _MenuPool:AddSubMenu(LEOMenu, 'Vehicles', '', true)
                 LEOVehicles:SetMenuWidthOffset(Config.MenuWidth)
@@ -1059,7 +1063,7 @@ Citizen.CreateThread(function()
 		Citizen.Wait(0)
 		
 		_MenuPool:ProcessMenus()	
-		_MenuPool:ControlDisablingEnabled(false)
+		--_MenuPool:ControlDisablingEnabled(false)
 		_MenuPool:MouseControlsEnabled(false)
 		
 		if IsControlJustPressed(1, Config.MenuButton) and GetLastInputMethod(2) then
