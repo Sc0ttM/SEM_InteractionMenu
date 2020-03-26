@@ -60,16 +60,38 @@ function Menu()
 
 
 
-    if LEORestrict() then
+    if LEORestrict() then    
         local LEOMenu = _MenuPool:AddSubMenu(MainMenu, 'LEO Toolbox', 'Law Enforcement Related Menu', true)
-        LEOMenu:SetMenuWidthOffset(Config.MenuWidth)
-            local LEOActions = _MenuPool:AddSubMenu(LEOMenu, 'Actions', '', true)
-            LEOActions:SetMenuWidthOffset(Config.MenuWidth)
+            LEOMenu:SetMenuWidthOffset(Config.MenuWidth)
+                -- Radar menu by endigma#4426
+                    local RadarMenu = _MenuPool:AddSubMenu(LEOMenu, 'Radar Options', 'Configure the WraithRS Radar', true)
+                    local ToggleRadar = NativeUI.CreateItem('Toggle WraithRS Radar', 'Toggles WraithRS Radar')
+                    --local ToggleRemote = NativeUI.CreateItem('Toggle Remote', 'Toggles WraithRS Radar Remote')
+                    local FrontMode = NativeUI.CreateItem('Front Radar Mode', 'Cycles through Front Radar modes')
+                    local RearMode = NativeUI.CreateItem('Rear Radar Mode', 'Cycles through Rear Radar modes')
+                    local ToggleFrontRadar = NativeUI.CreateItem('Front Radar Toggle', 'Toggles Front XMIT')
+                    local ToggleRearRadar = NativeUI.CreateItem('Rear Radar Toggle', 'Toggles Rear XMIT')
+                    local setFast = NativeUI.CreateItem('Set Fast Limit', 'Changes the speed at which a vehicle will be flagged')
+                    RadarMenu:AddItem(ToggleRadar)
+                    --RadarMenu:AddItem(ToggleRemote)
+                    RadarMenu:AddItem(ToggleFrontRadar)
+                    RadarMenu:AddItem(FrontMode)
+
+                    RadarMenu:AddItem(ToggleRearRadar)
+                    RadarMenu:AddItem(RearMode)
+
+                    RadarMenu:AddItem(setFast)
+                    RadarMenu:SetMenuWidthOffset(Config.MenuWidth)
+
+                
+                -- action menu
+                local LEOActions = _MenuPool:AddSubMenu(LEOMenu, 'Actions', '', true)
+                LEOActions:SetMenuWidthOffset(Config.MenuWidth)
                 local Cuff = NativeUI.CreateItem('Cuff', 'Cuff Closest Player')
                 local Drag = NativeUI.CreateItem('Drag', 'Drags Closest Player')
                 local Seat = NativeUI.CreateItem('Seat', 'Puts Player in Vehicle')
                 local Unseat = NativeUI.CreateItem('Unseat', 'Removes Player from Vehicle')
-                local Radar = NativeUI.CreateItem('Radar', 'Toggles Wraith Radar')
+                --local Radar = NativeUI.CreateItem('Radar', 'Toggles Wraith Radar')
                 local Inventory = NativeUI.CreateItem('Inventory', 'Search Inventory')
                 local BAC = NativeUI.CreateItem('BAC', 'Tests BAC Level')
                 local Jail = NativeUI.CreateItem('Jail', 'Jail Player')
@@ -77,6 +99,8 @@ function Menu()
                 local Shield = NativeUI.CreateItem('Toggle Shield', 'Toggles Bulletproof Shield')
                 local CarbineRifle = NativeUI.CreateItem('Toggle Carbine', 'Toggles Carbine Rifle')
                 local Shotgun = NativeUI.CreateItem('Toggle Shotgun', 'Toggles Shotgun')
+                
+                -- props menu
                 PropsList = {}
                 for _, Prop in pairs(Config.LEOProps) do
                     table.insert(PropsList, Prop.name)
@@ -87,7 +111,7 @@ function Menu()
                 LEOActions:AddItem(Drag)
                 LEOActions:AddItem(Seat)
                 LEOActions:AddItem(Unseat)
-                LEOActions:AddItem(Radar)
+                --LEOMenu:AddItem(Radar)
                 LEOActions:AddItem(Inventory)
                 LEOActions:AddItem(BAC)
 				if Config.LEOJail then
@@ -198,13 +222,167 @@ function Menu()
                     
                     TriggerServerEvent('SEM_InteractionMenu:UnseatNear', ClosestId)
                 end
-                Radar.Activated = function(ParentMenu, SelectedItem)
+                ToggleRadar.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    TriggerEvent('wk:toggleRadar')
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end
+                setFast.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    Radar_SetLimit()
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end
+                function Radar_SetLimit()
+                    Citizen.CreateThread( function()
+                        DisplayOnscreenKeyboard( false, "", "", "", "", "", "", 4 )
+                
+                        while true do 
+                            if ( UpdateOnscreenKeyboard() == 1 ) then 
+                                local speedStr = GetOnscreenKeyboardResult()
+                
+                                if ( string.len( speedStr ) > 0 ) then 
+                                    local speed = tonumber( speedStr )
+                
+                                    if ( speed < 999 and speed > 1 ) then 
+                                        TriggerEvent( 'wk:changeRadarLimit', speed )
+                                    end 
+                
+                                    break
+                                else 
+                                    DisplayOnscreenKeyboard( false, "", "", "", "", "", "", 4 )
+                                end 
+                            elseif ( UpdateOnscreenKeyboard() == 2 ) then 
+                                break 
+                            end  
+                
+                            Citizen.Wait( 0 )
+                        end 
+                    end )
+                end
+                --[[setSpeedType.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    TriggerEvent('wk:radar')
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end]]
+                --[[ToggleRemote.Activated = function(ParentMenu, SelectedItem)
                     if GotRadar() then
                         if IsPedInAnyVehicle(GetPlayerPed(-1)) then
                             if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
                                 if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
                                     _MenuPool:CloseAllMenus()
                                     TriggerEvent('wk:radarRC')
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end]]
+                FrontMode.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    TriggerEvent('wk:setFrontMode')
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end
+                RearMode.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    TriggerEvent('wk:setRearMode')
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end
+                ToggleFrontRadar.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    TriggerEvent('wk:toggleFront')
+                                else
+                                    Notify('~o~You need to be in the driver seat')
+                                end
+                            else
+                                Notify('~o~You need to be in a police vehicle')
+                            end
+                        else
+                            Notify('~o~You need to be in a vehicle')
+                        end
+                    end
+                end
+            
+                ToggleRearRadar.Activated = function(ParentMenu, SelectedItem)
+                    if GotRadar() then
+                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                                    --_MenuPool:CloseAllMenus()
+                                    TriggerEvent('wk:toggleRear')
                                 else
                                     Notify('~o~You need to be in the driver seat')
                                 end
