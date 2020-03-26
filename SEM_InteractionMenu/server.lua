@@ -21,22 +21,38 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:CuffNear')
 AddEventHandler('SEM_InteractionMenu:CuffNear', function(ID)
-    TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
+		TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
-	TriggerClientEvent('Drag', ID, source)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
+		TriggerClientEvent('Drag', ID, source)
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:SeatNear')
 AddEventHandler('SEM_InteractionMenu:SeatNear', function(ID, Vehicle)
-    TriggerClientEvent('SEM_InteractionMenu:Seat', ID, Vehicle)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
+		TriggerClientEvent('SEM_InteractionMenu:Seat', ID, Vehicle)
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:UnseatNear')
 AddEventHandler('SEM_InteractionMenu:UnseatNear', function(ID, Vehicle)
-    TriggerClientEvent('SEM_InteractionMenu:Unseat', ID, Vehicle)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
+		TriggerClientEvent('SEM_InteractionMenu:Unseat', ID, Vehicle)
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Spikes-TriggerDeleteSpikes')
@@ -46,18 +62,30 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Jail')
 AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
 	TriggerClientEvent('SEM_InteractionMenu:JailPlayer', ID, Time)
-	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' seconds')
+	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' seconds')	
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unjail')
 AddEventHandler('SEM_InteractionMenu:Unjail', function(ID)
-	TriggerClientEvent('SEM_InteractionMenu:UnjailPlayer', ID)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
+	TriggerClientEvent('SEM_InteractionMenu:UnjailPlayer', ID)		
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Backup')
 AddEventHandler('SEM_InteractionMenu:Backup', function(Code, StreetName, Coords)
-	TriggerClientEvent('SEM_InteractionMenu:CallBackup', -1, Code, StreetName, Coords)
+	if source == 0 or IsPlayerAceAllowed(source, "sem.leo") then
+		TriggerClientEvent('SEM_InteractionMenu:CallBackup', -1, Code, StreetName, Coords)
+	else
+		Notify('~r~No Permission!')
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Ads')
