@@ -10,7 +10,7 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.5.2**
+Current Version: **dev_v1.5.2**
 
 Current Changes: **• Added AD logs
 • Fixed vehicle flipping when sheild is in hand
