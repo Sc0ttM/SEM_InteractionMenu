@@ -10,7 +10,7 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.5**
+Current Version: **v1.5.1**
 
 Current Changes: **...**
 
