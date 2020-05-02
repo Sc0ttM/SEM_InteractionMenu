@@ -1,4 +1,4 @@
-# SEM_InteractionMenu
+# SEM_InteractionMenu - Development Branch
 *Multi Purpose FiveM Interaction Menu*
 
 This resource is a menu with actions for LEO, Fire and Civ including Vehicle Controls and Emotes!
@@ -10,12 +10,8 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.4**
+Current Version: **v1.5**
 
-Changes: **Fixed Jail & Hospital Config Option Operating Incorrectly**
+Current Changes: **...**
 
-Support/Discord: https://semdevelopment.com/discord
-
-Information/Instructions: https://semdevelopment.com/releases/interactionmenu
-
-*For full changes checkout https://semdevelopment.com/releases/interactionmenu/changelog*
+This version is not recommend for public use!
