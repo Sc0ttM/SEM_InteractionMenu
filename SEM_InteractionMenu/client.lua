@@ -354,7 +354,7 @@ AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
             if EarlyRelease then
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail on Parole')
             else
-                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail after ' .. OriginalJailTime .. ' seconds.')
+                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail after ' .. OriginalJailTime .. ' second(s).')
             end
             SetEntityCoords(Ped, Config.JailLocation.Release.x, Config.JailLocation.Release.y, Config.JailLocation.Release.z)
             SetEntityHeading(Ped, Config.JailLocation.Release.h)
@@ -430,8 +430,8 @@ end)
 
 --Civilian Adverts
 RegisterNetEvent('SEM_InteractionMenu:SyncAds')
-AddEventHandler('SEM_InteractionMenu:SyncAds',function(Text, Name, Loc, File)
-    Ad(Text, Name, Loc, File)
+AddEventHandler('SEM_InteractionMenu:SyncAds',function(Text, Name, Loc, File, ID)
+    Ad(Text, Name, Loc, File, ID)
 end)
 
 
@@ -525,7 +525,7 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
             if EarlyDischarge then
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital early')
             else
-                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' seconds.')
+                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' second(s).')
             end
             SetEntityCoords(Ped, Config.HospitalLocation.Release.x, Config.HospitalLocation.Release.y, Config.HospitalLocation.Release.z)
             SetEntityHeading(Ped, Config.HospitalLocation.Release.h)
@@ -545,9 +545,9 @@ end)
 --Station Blips
 Citizen.CreateThread(function()
     if Config.DisplayStationBlips then
-        local function CreateBlip(x, y, z, Name, Colour)
+        local function CreateBlip(x, y, z, Name, Colour, Sprite)
             StationBlip = AddBlipForCoord(x, y, z)
-            SetBlipSprite(StationBlip, 60)
+            SetBlipSprite(StationBlip, Sprite)
             if Config.StationBlipsDispalyed == 1 then
                 SetBlipDisplay(StationBlip, 3)
             elseif Config.StationBlipsDispalyed == 2 then
@@ -564,10 +564,13 @@ Citizen.CreateThread(function()
         end
 
         for _, Station in pairs(Config.LEOStations) do
-            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Police Station', 38)
+            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Police Station', 38, 60)
         end
         for _, Station in pairs(Config.FireStations) do
-            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Fire Station', 1)
+            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Fire Station', 1, 60)
+        end
+        for _, Station in pairs(Config.HospitalStations) do
+            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Hospital', 2, 61)
         end
     end
 end)
@@ -620,7 +623,7 @@ end)
 
 --Commands
 Citizen.CreateThread(function()
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local Index = 0
         local Emotes = ''
         for _, Emote in pairs(Config.EmotesList) do
@@ -652,11 +655,11 @@ Citizen.CreateThread(function()
     TriggerEvent('chat:removeSuggestion', '/unjail')
     TriggerEvent('chat:removeSuggestion', '/unhospital')
 
-    if Config.LEOAccess == 2 or Config.FireAccess == 2 then
-        if Config.OndutyPSWD == '' then
-            TriggerEvent('chat:addSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}})
-        else
+    if Config.LEOAccess == 3 or Config.FireAccess == 3 then
+        if Config.OndutyPSWDActive then
             TriggerEvent('chat:addSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}, {name = 'Password', help = 'Onduty Password'}})
+        else
+            TriggerEvent('chat:addSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}})
         end
     else
         TriggerEvent('chat:removeSuggestion', '/onduty')
@@ -666,14 +669,24 @@ end)
 LEOOnduty = false
 FireOnduty = false
 RegisterCommand('onduty', function(source, args, rawCommands)
-    if Config.LEOAccess == 2 or Config.FireAccess == 2 then
-        if Config.OndutyPSWD ~= '' then
+    if Config.LEOAccess == 3 or Config.FireAccess == 3 then
+        if Config.OndutyPSWDActive then
             if args[2] == Config.OndutyPSWD then
                 local Department = args[1]:lower()
                 if Department == 'leo' then
                     LEOOnduty = not LEOOnduty
+                    if LEOOnduty then
+                        Notify('~g~You are onduty as an LEO')
+                    else
+                        Notify('~o~You are no longer onduty as an LEO')
+                    end
                 elseif Department == 'fire' then
                     FireOnduty = not FireOnduty
+                    if FireOnduty == true then
+                        Notify('~g~You are onduty as an Firefighter')
+                    else
+                        Notify('~o~You are no longer onduty as an Firefighter')
+                    end
                 else
                     Notify('~r~Invalid Department!')
                 end
@@ -684,8 +697,18 @@ RegisterCommand('onduty', function(source, args, rawCommands)
             local Department = args[1]:lower()
             if Department == 'leo' then
                 LEOOnduty = not LEOOnduty
+                if LEOOnduty then
+                    Notify('~g~You are onduty as an LEO')
+                else
+                    Notify('~o~You are no longer onduty as an LEO')
+                end
             elseif Department == 'fire' then
                 FireOnduty = not FireOnduty
+                if FireOnduty == true then
+                    Notify('~g~You are onduty as an Firefighter')
+                else
+                    Notify('~o~You are no longer onduty as an Firefighter')
+                end
             else
                 Notify('~r~Invalid Department!')
             end
@@ -697,7 +720,11 @@ RegisterCommand('cuff', function(source, args, rawCommands)
     if LEORestrict() or FireRestrict() then
         if args[1] ~= nil then
             local ID = tonumber(args[1])
-            TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+            if GetDistance(source) < Config.CommandDistance then
+                TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+            else
+                Notify('~r~That player is too far away')
+            end
         else
             TriggerServerEvent('SEM_InteractionMenu:CuffNear', GetClosestPlayer())
         end
@@ -710,7 +737,11 @@ RegisterCommand('drag', function(source, args, rawCommands)
     if LEORestrict() or FireRestrict() then
         if args[1] ~= nil then
             local ID = tonumber(args[1])
-            TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+            if GetDistance(source) < Config.CommandDistance then
+                TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+            else
+                Notify('~r~That player is too far away')
+            end
         else
             TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())
         end
@@ -738,17 +769,21 @@ RegisterCommand('unhospital', function(source, args, rawCommands)
 end)
 
 RegisterCommand('loadout', function(source, args, rawCommands)
-    SetEntityHealth(GetPlayerPed(-1), 200)
-    RemoveAllPedWeapons(GetPlayerPed(-1), true)
-    AddArmourToPed(GetPlayerPed(-1), 100)
-    GiveWeapon('weapon_nightstick')
-    GiveWeapon('weapon_flashlight')
-    GiveWeapon('weapon_fireextinguisher')
-    GiveWeapon('weapon_flare')
-    GiveWeapon('weapon_stungun')
-    GiveWeapon('weapon_combatpistol')
-    AddWeaponComponent('weapon_combatpistol', 'component_at_pi_flsh')
-    Notify('~g~Loadout Spawned')
+    if LEORestrict() then
+        SetEntityHealth(GetPlayerPed(-1), 200)
+        RemoveAllPedWeapons(GetPlayerPed(-1), true)
+        AddArmourToPed(GetPlayerPed(-1), 100)
+        GiveWeapon('weapon_nightstick')
+        GiveWeapon('weapon_flashlight')
+        GiveWeapon('weapon_fireextinguisher')
+        GiveWeapon('weapon_flare')
+        GiveWeapon('weapon_stungun')
+        GiveWeapon('weapon_combatpistol')
+        AddWeaponComponent('weapon_combatpistol', 'component_at_pi_flsh')
+        Notify('~g~Loadout Spawned')
+    else
+        Notify('~r~You aren\'t an LEO')
+    end
 end)
 
 RegisterCommand('hu', function(source, args, rawCommands)
@@ -832,7 +867,7 @@ RegisterCommand('trunk', function(source, args, rawCommands)
 end)
 
 RegisterCommand('emotes', function(source, args, rawCommands)
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local Index = 0
         local Emotes = ''
         for _, Emote in pairs(Config.EmotesList) do
@@ -853,7 +888,7 @@ RegisterCommand('emotes', function(source, args, rawCommands)
 end)
 
 RegisterCommand('emote', function(source, args, rawCommands)
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local SelectedEmote = args[1]
 
         for _, Emote in pairs(Config.EmotesList) do

@@ -73,8 +73,15 @@ Config.MenuTitleCustom = 'Custom Menu Title'
 --                                                           --
 ---------------------------------------------------------------
 
---This is the onduty password, only people with the password can access the menu if chosen at Config.LEOAccess/Config.FireAccess (If you wish NOT to have the password but still use the command set it to '')
-Config.OndutyPSWD = ''
+--This determines if the onduty password is active, if false the password will NOT be required when doing the command
+Config.OndutyPSWDActive = false
+
+--This is the onduty password, only people with the password can access the menu if chosen at Config.LEOAccess/Config.FireAccess
+Config.OndutyPSWD = 'OndutyPSWD'
+
+--This determines how close you need to be to cuff/drag someone using their ID
+--Default = 100
+Config.CommandDistance = 100
 
 --This determines if the stations section of the LEO & Fire menu will be visible
 --Station Locations can be set at Config.LEOStations & Config.FireStations
@@ -114,8 +121,8 @@ Config.StationBlipsDispalyed = 0
 
 --This sets who can access the LEO menu
 --!!! NOTE: If LEO Peds is selected then onlys peds from the Config.LEOUniforms will have access to the menu
---Everyone = 0 [Default]  |  LEO Peds = 1  |  Onduty Command = 2  |  Ace Permissions = 3
-Config.LEOAccess = 0
+--Disabled = 0 | Everyone = 1 [Default]  |  LEO Peds = 2  |  Onduty Command = 3  |  Ace Permissions = 4
+Config.LEOAccess = 1
 
 --This is the resource name of the police radar script, this has to be set correctly (It is case sensative!)
 --NOTE: Wraith Radar is the ONLY radar script that works with the menu at the moment (This also includes any editied version) - Only the old version 'WraithRS | Advanced Radar System' works link below
@@ -138,7 +145,7 @@ Config.UnrackConstant = true
 Config.LEOJail = true
 
 --This is the max time that someone can be jailed for (Seconds)
-Config.MaxJailTime = 300
+Config.MaxJailTime = 300000
 
 --These is the location of the jail and release point
 Config.JailLocation = {
@@ -285,6 +292,18 @@ Config.LEOVehiclesCategories = {
     },
 }
 
+--This determines if the ai traffic manager will can accessible
+Config.DisplayTrafficManager = true
+
+--This determines what radius are avaiable via the traffic manager
+Config.AvaliableRaduies = {
+    {name = 'Small', size = 30.0},
+    {name = 'Medium', size = 40.0},
+    {name = 'Large', size = 50.0},
+    {name = 'Ex Large', size = 60.0},
+    {name = 'Mega', size = 80.0}
+}
+
 
 
 
@@ -309,8 +328,8 @@ Config.LEOVehiclesCategories = {
 
 --This sets who can access the Fire menu
 --!!! NOTE: If Fire Peds is selected then onlys peds from the Config.FireUniforms will have access to the menu
---Everyone = 0 [Default]  |  Fire Peds = 1  |  Onduty Command = 2  |  Ace Permissions = 3
-Config.FireAccess = 0
+--Disabled = 0 | Everyone = 1 [Default]  |  Fire Peds = 2  |  Onduty Command = 3  |  Ace Permissions = 4
+Config.FireAccess = 1
 
 --This sets if the Hospitalize functions will be visible in the menu
 Config.FireHospital = true
@@ -337,6 +356,15 @@ Config.FireStations = {
     {name = 'Davis', coords = {x = 201.16, y = -1631.67, z = 29.75, h = 296.67}},
     {name = 'Rockford Hill', coords = {x = -636.47, y = -117.02, z = 38.02, h = 79.64}},
     {name = 'El Burro Heights', coords = {x = 1191.83, y = -1461.74, z = 34.88, h = 329.54}},
+}
+
+--These are the locations of hospitals avaiable via the hospital menu
+Config.HospitalStations = {
+    {name = 'Sandy Shores', coords = {x = 1839.13, y = 3673.26, z = 34.27 , h = 210.83}},
+    {name = 'Paleto Bay', coords = {x = -247.34, y = 6332.39, z = 32.42 , h = 226.90}},
+    
+    {name = 'Pillbox', coords = {x = 357.19, y = -593.46, z = 28.78, h = 260.70}},
+    {name = 'Davis', coords = {x = 294.59, y = -1448.17, z = 29.96, h = 320.92}},
 }
 
 --These are the Fire uniforms that are available via the loadouts - these will also be the uniforms which will give access to the Fire menu if that option if chosen at Config.FireAccess
@@ -396,6 +424,11 @@ Config.FireVehicles = {
 --                     Civilian Features                     --
 --                                                           --
 ---------------------------------------------------------------
+
+--This sets who can access the Civlian menu
+--!!! NOTE: If Fire Peds is selected then onlys peds from the Config.FireUniforms will have access to the menu
+--Disabled = 0 | Everyone = 1 [Default]
+Config.CivAccess = 1
 
 --This determines if the Civilian vehicles section if available
 Config.ShowCivVehicles = true
@@ -480,8 +513,8 @@ Config.CivAdverts = {
 ---------------------------------------------------------------
 
 --This sets when players can access the vehicle menu
---All the Time = 0 [Default] | When in Vehicle = 1
-Config.VehicleAccess = 0
+--Disabled = 0 | All the Time = 1 [Default] | When in Vehicle = 2
+Config.VehicleAccess = 1
 
 --This determines if the vehicle options are avaiable, these include: Fix, Clean, Delete
 Config.VehicleOptions = true
@@ -507,6 +540,10 @@ Config.VehicleOptions = true
 --                       Emote Features                      --
 --                                                           --
 ---------------------------------------------------------------
+
+--This sets which players can access the emote menu
+--Disabled = 0 | Everyone = 1 [Default]
+Config.EmoteAccess = 1
 
 --This determins if the emotes will be available via the menu or command
 Config.DisplayEmotes = true

@@ -47,7 +47,7 @@ end)
 RegisterServerEvent('SEM_InteractionMenu:Jail')
 AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
 	TriggerClientEvent('SEM_InteractionMenu:JailPlayer', ID, Time)
-	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' seconds')
+	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' second(s)')
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unjail')
@@ -62,8 +62,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Ads')
 AddEventHandler('SEM_InteractionMenu:Ads', function(Text, Name, Loc, File)
-	TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File)
-	TriggerClientEvent('chatMessage', -1, 'AD', {218, 255, 0}, '^*^_' .. GetPlayerName(source) .. '^r[' .. source .. '] is advertising for ^0^*' .. Name)
+	TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File, source)
 end)
 
 BACList = {}
@@ -94,7 +93,7 @@ end)
 RegisterServerEvent('SEM_InteractionMenu:Hospitalize')
 AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time)
 	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time)
-	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' seconds')
+	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' second(s)')
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unhospitalize')

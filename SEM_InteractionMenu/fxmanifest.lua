@@ -1,7 +1,7 @@
 --[[
 ──────────────────────────────────────────────────────────────────
 
-	SEM_AOP (fxmanifest.lua) - Created by Scott M
+	SEM_InteractionMenu (fxmanifest.lua) - Created by Scott M
 	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord

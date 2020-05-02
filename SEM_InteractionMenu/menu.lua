@@ -87,7 +87,9 @@ function Menu()
                 LEOActions:AddItem(Drag)
                 LEOActions:AddItem(Seat)
                 LEOActions:AddItem(Unseat)
-                LEOActions:AddItem(Radar)
+                if GotRadar() then
+                    LEOActions:AddItem(Radar)
+                end
                 LEOActions:AddItem(Inventory)
                 LEOActions:AddItem(BAC)
 				if Config.LEOJail then
@@ -108,53 +110,12 @@ function Menu()
                     TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())
                 end
                 Seat.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
                     local Veh = GetVehiclePedIsIn(Ped, true)
 
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
-                    end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-
-                    TriggerServerEvent('SEM_InteractionMenu:SeatNear', ClosestId, Veh)
+                    TriggerServerEvent('SEM_InteractionMenu:SeatNear', GetClosestPlayer(), Veh)
                 end
                 Unseat.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
-                    end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-                    
-                    TriggerServerEvent('SEM_InteractionMenu:UnseatNear', ClosestId)
+                    TriggerServerEvent('SEM_InteractionMenu:UnseatNear', GetClosestPlayer())
                 end
                 Radar.Activated = function(ParentMenu, SelectedItem)
                     if GotRadar() then
@@ -232,7 +193,7 @@ function Menu()
                         return
                     end
 
-                    local JailTime = tonumber(KeyboardInput('Time: (Seconds) - Max Time: ' .. Config.MaxJailTime .. ' | Default Time: 30', 3))
+                    local JailTime = tonumber(KeyboardInput('Time: (Seconds) - Max Time: ' .. Config.MaxJailTime .. ' | Default Time: 30', string.len(Config.MaxJailTime)))
                     if JailTime == nil then
                         JailTime = 30
                     end
@@ -442,6 +403,81 @@ function Menu()
                     end
                 end
             end
+
+            if Config.DisplayTrafficManager then
+                local LEOTrafficManager = _MenuPool:AddSubMenu(LEOMenu, 'Traffic Manager', '', true)
+                LEOTrafficManager:SetMenuWidthOffset(Config.MenuWidth)
+    
+                AreaSize = 30.0
+                Raduies = {}
+                for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
+                    table.insert(Raduies, RaduisInfo.name)
+                end
+
+                    local Radius = NativeUI.CreateListItem('Radius', Raduies, 1, '')
+                    local ResumeTraffic = NativeUI.CreateItem('~g~Resume ~w~Traffic', '')
+                    local SlowTraffic = NativeUI.CreateItem('~y~Slow ~w~Traffic', '')
+                    local StopTraffic = NativeUI.CreateItem('~r~Stop ~w~Traffic', '')
+                    LEOTrafficManager:AddItem(Radius)
+                    LEOTrafficManager:AddItem(ResumeTraffic)
+                    LEOTrafficManager:AddItem(SlowTraffic)
+                    LEOTrafficManager:AddItem(StopTraffic)
+                    Radius.OnListChanged = function(sender, item, index)
+                        if item == Radius then
+                            for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
+                                if RaduisInfo.name == item:IndexToItem(index) then
+                                    AreaSize = RaduisInfo.size
+                                end
+                            end
+                        end
+                    end
+                    ResumeTraffic.Activated = function(ParentMenu, SelectedItem)
+                        if Zone ~= nil then
+                            RemoveSpeedZone(Zone)
+                            RemoveBlip(Area)
+                            Notify("Traffic ~g~Resumed")
+                            Zone = nil
+                            if Zone2 then
+                                RemoveSpeedZone(Zone2)
+                                RemoveBlip(Area2)
+                            end
+                        end
+                    end
+                    SlowTraffic.Activated = function(ParentMenu, SelectedItem)
+                        if Zone ~= nil then 
+                            RemoveSpeedZone(Zone)
+                            Notify("Traffic ~g~Resumed")
+                            Zone = nil
+                            RemoveBlip(Area)
+                        else
+                            Notify("Traffic ~y~Slowed")
+                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
+                            SetBlipAlpha(Area, 80)
+                            SetBlipColour(Area, 28)
+                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 5.0, false)
+                        end
+                    end
+                    StopTraffic.Activated = function(ParentMenu, SelectedItem)
+                        if Zone ~= nil then 
+                            RemoveSpeedZone(Zone)
+                            RemoveSpeedZone(Zone2)
+                            RemoveBlip(Area)
+                            RemoveBlip(Area2)
+                            Notify("Traffic ~g~Resumed")
+                            Zone = nil
+                        else
+                            Notify("Traffic ~r~Stopped")
+                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
+                            Area2 = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize + 20.0)
+                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 0.0, false)
+                            Zone2 = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize + 20.0, 0.0, false)
+                            SetBlipAlpha(Area, 90)
+                            SetBlipAlpha(Area2, 80)
+                            SetBlipColour(Area, 1)
+                            SetBlipColour(Area2, 1)
+                        end
+                    end
+            end
     end
 
 
@@ -556,25 +592,47 @@ function Menu()
                 end
 
             if Config.ShowStations then
-                local FireStation = _MenuPool:AddSubMenu(FireMenu, 'Stations', '', true)
-                FireStation:SetMenuWidthOffset(Config.MenuWidth)
-                    for _, Station in pairs(Config.FireStations) do
-                        local StationCategory = _MenuPool:AddSubMenu(FireStation, Station.name, '', true)
-                        StationCategory:SetMenuWidthOffset(Config.MenuWidth)
-                            local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Sets Waypoint to Station')
-                            local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to Station')
-                            StationCategory:AddItem(SetWaypoint)
-                            if Config.AllowStationTeleport then
-                                StationCategory:AddItem(Teleport)
-                            end
-                            SetWaypoint.Activated = function(ParentMenu, SelectedItem)
-                                SetNewWaypoint(Station.coords.x, Station.coords.y)
-                            end
-                            Teleport.Activated = function(ParentMenu, SelectedItem)
-                                SetEntityCoords(PlayerPedId(), Station.coords.x, Station.coords.y, Station.coords.z)
-                                SetEntityHeading(PlayerPedId(), Station.coords.h)
-                            end
-                    end
+                local FireEMSStation = _MenuPool:AddSubMenu(FireMenu, 'Stations', '', true)
+                FireEMSStation:SetMenuWidthOffset(Config.MenuWidth)
+                    local FireStation = _MenuPool:AddSubMenu(FireEMSStation, 'Fire Stations', '', true)
+                    FireStation:SetMenuWidthOffset(Config.MenuWidth)
+                        for _, Station in pairs(Config.FireStations) do
+                            local StationCategory = _MenuPool:AddSubMenu(FireStation, Station.name, '', true)
+                            StationCategory:SetMenuWidthOffset(Config.MenuWidth)
+                                local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Sets Waypoint to Station')
+                                local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to Station')
+                                StationCategory:AddItem(SetWaypoint)
+                                if Config.AllowStationTeleport then
+                                    StationCategory:AddItem(Teleport)
+                                end
+                                SetWaypoint.Activated = function(ParentMenu, SelectedItem)
+                                    SetNewWaypoint(Station.coords.x, Station.coords.y)
+                                end
+                                Teleport.Activated = function(ParentMenu, SelectedItem)
+                                    SetEntityCoords(PlayerPedId(), Station.coords.x, Station.coords.y, Station.coords.z)
+                                    SetEntityHeading(PlayerPedId(), Station.coords.h)
+                                end
+                        end
+
+                    local EMSStation = _MenuPool:AddSubMenu(FireEMSStation, 'Hospitals', '', true)
+                    EMSStation:SetMenuWidthOffset(Config.MenuWidth)
+                        for _, Station in pairs(Config.HospitalStations) do
+                            local StationCategory = _MenuPool:AddSubMenu(EMSStation, Station.name, '', true)
+                            StationCategory:SetMenuWidthOffset(Config.MenuWidth)
+                                local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Sets Waypoint to Station')
+                                local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to Station')
+                                StationCategory:AddItem(SetWaypoint)
+                                if Config.AllowStationTeleport then
+                                    StationCategory:AddItem(Teleport)
+                                end
+                                SetWaypoint.Activated = function(ParentMenu, SelectedItem)
+                                    SetNewWaypoint(Station.coords.x, Station.coords.y)
+                                end
+                                Teleport.Activated = function(ParentMenu, SelectedItem)
+                                    SetEntityCoords(PlayerPedId(), Station.coords.x, Station.coords.y, Station.coords.z)
+                                    SetEntityHeading(PlayerPedId(), Station.coords.h)
+                                end
+                        end
             end
 
             local FireLoadouts = _MenuPool:AddSubMenu(FireMenu, 'Loadouts', '', true)
@@ -646,112 +704,114 @@ function Menu()
 
 
 
-
-	local CivMenu = _MenuPool:AddSubMenu(MainMenu, 'Civ Toolbox', 'Civilian Related Menu', true)
-    CivMenu:SetMenuWidthOffset(Config.MenuWidth)
-        local CivActions = _MenuPool:AddSubMenu(CivMenu, 'Actions', '', true)
-        CivActions:SetMenuWidthOffset(Config.MenuWidth)
-            local HU = NativeUI.CreateItem('HU', 'Hands Up')
-            local HUK = NativeUI.CreateItem('HUK', 'Hands Up and Kneel')
-            local Inventory = NativeUI.CreateItem('Inventory', 'Set Inventory')
-            local BAC = NativeUI.CreateItem('BAC', 'Set BAC Level')
-            local DropWeapon = NativeUI.CreateItem('Drop Weapon', 'Drops Weapon on the floor')
-            CivActions:AddItem(HU)
-            CivActions:AddItem(HUK)
-            CivActions:AddItem(Inventory)
-            CivActions:AddItem(BAC)
-            CivActions:AddItem(DropWeapon)
-            HU.Activated = function(ParentMenu, SelectedItem)
-                local Ped = PlayerPedId()
-                if DoesEntityExist(Ped) and not HandCuffed then
-                    Citizen.CreateThread(function()
-                        LoadAnimation('random@mugging3')
-                        if IsEntityPlayingAnim(Ped, 'random@mugging3', 'handsup_standing_base', 3) or HandCuffed then
-                            ClearPedSecondaryTask(Ped)
-                            SetEnableHandcuffs(Ped, false)
-                        elseif not IsEntityPlayingAnim(Ped, 'random@mugging3', 'handsup_standing_base', 3) or not HandCuffed then
-                            TaskPlayAnim(Ped, 'random@mugging3', 'handsup_standing_base', 8.0, -8, -1, 49, 0, 0, 0, 0)
-                            SetEnableHandcuffs(Ped, true)
-                        end
-                    end)
-                end
-            end
-            HUK.Activated = function(ParentMenu, SelectedItem)
-                local Ped = PlayerPedId()
-                if (DoesEntityExist(Ped) and not IsEntityDead(Ped)) and not HandCuffed then
-                    Citizen.CreateThread(function()
-                        LoadAnimation('random@arrests')
-                        if (IsEntityPlayingAnim(Ped, 'random@arrests', 'kneeling_arrest_idle', 3)) then
-                            TaskPlayAnim(Ped, 'random@arrests', 'kneeling_arrest_get_up', 8.0, 1.0, -1, 128, 0, 0, 0, 0)
-                        else
-                            TaskPlayAnim(Ped, 'random@arrests', 'idle_2_hands_up', 8.0, 1.0, -1, 2, 0, 0, 0, 0)
-                            Wait (4000)
-                            TaskPlayAnim(Ped, 'random@arrests', 'kneeling_arrest_idle', 8.0, 1.0, -1, 2, 0, 0, 0, 0)
-                        end
-                    end)
-                end
-            end
-            Inventory.Activated = function(ParentMenu, SelectedItem)
-                local Items = KeyboardInput('Items:', 75)
-                if Items == nil or Items == '' then
-                    Notify('~r~No Items Provided!')
-                    return
-                end
-
-                TriggerServerEvent('SEM_InteractionMenu:InventorySet', Items)
-                Notify('~g~Inventory Set!')
-            end
-            BAC.Activated = function(ParentMenu, SelectedItem)
-                local BACLevel = KeyboardInput('BAC Level - Legal Limit: 0.08', 5)
-                if BACLevel == nil or BACLevel == '' then
-                    Notify('~r~No BAC Level Provided!')
-                    return
-                end
-
-                TriggerServerEvent('SEM_InteractionMenu:BACSet', tonumber(BACLevel))
-                if tonumber(BACLevel) < 0.08 then
-                    Notify('~b~BAC Level Set: ~g~' .. tostring(BACLevel))
-                else
-                    Notify('~b~BAC Level Set: ~r~' .. tostring(BACLevel))
-                end
-            end
-            DropWeapon.Activated = function(ParentMenu, SelectedItem)
-                local CurrentWeapon = GetSelectedPedWeapon(GetPlayerPed(-1))
-                SetPedDropsInventoryWeapon(GetPlayerPed(-1), CurrentWeapon, -2.0, 0.0, 0.5, 30)
-                Notify('~r~Weapon Dropped!')
-            end
-        if Config.ShowCivAdverts then
-            local CivAdverts = _MenuPool:AddSubMenu(CivMenu, 'Adverts', 'Civilian Adverts', true)
-            CivAdverts:SetMenuWidthOffset(Config.MenuWidth)
-                for _, Ad in pairs(Config.CivAdverts) do
-                    local Advert  = NativeUI.CreateItem(Ad.name, '')
-                    CivAdverts:AddItem(Advert)
-                    Advert.Activated = function(ParentMenu, SelectedItem)
-                        local Message = KeyboardInput('Message:', 128)
-                        if Message == nil or Message == '' then
-                            Notify('~r~No Advert Message Provided!')
-                            return
-                        end
-            
-                        TriggerServerEvent('SEM_InteractionMenu:Ads', Message, Ad.name, Ad.loc, Ad.file)
+    if CivRestrict() then
+        local CivMenu = _MenuPool:AddSubMenu(MainMenu, 'Civ Toolbox', 'Civilian Related Menu', true)
+        CivMenu:SetMenuWidthOffset(Config.MenuWidth)
+            local CivActions = _MenuPool:AddSubMenu(CivMenu, 'Actions', '', true)
+            CivActions:SetMenuWidthOffset(Config.MenuWidth)
+                local HU = NativeUI.CreateItem('HU', 'Hands Up')
+                local HUK = NativeUI.CreateItem('HUK', 'Hands Up and Kneel')
+                local Inventory = NativeUI.CreateItem('Inventory', 'Set Inventory')
+                local BAC = NativeUI.CreateItem('BAC', 'Set BAC Level')
+                local DropWeapon = NativeUI.CreateItem('Drop Weapon', 'Drops Weapon on the floor')
+                CivActions:AddItem(HU)
+                CivActions:AddItem(HUK)
+                CivActions:AddItem(Inventory)
+                CivActions:AddItem(BAC)
+                CivActions:AddItem(DropWeapon)
+                HU.Activated = function(ParentMenu, SelectedItem)
+                    local Ped = PlayerPedId()
+                    if DoesEntityExist(Ped) and not HandCuffed then
+                        Citizen.CreateThread(function()
+                            LoadAnimation('random@mugging3')
+                            if IsEntityPlayingAnim(Ped, 'random@mugging3', 'handsup_standing_base', 3) or HandCuffed then
+                                ClearPedSecondaryTask(Ped)
+                                SetEnableHandcuffs(Ped, false)
+                            elseif not IsEntityPlayingAnim(Ped, 'random@mugging3', 'handsup_standing_base', 3) or not HandCuffed then
+                                TaskPlayAnim(Ped, 'random@mugging3', 'handsup_standing_base', 8.0, -8, -1, 49, 0, 0, 0, 0)
+                                SetEnableHandcuffs(Ped, true)
+                            end
+                        end)
                     end
                 end
-        end
-		if Config.ShowCivVehicles then
-            local CivVehicles = _MenuPool:AddSubMenu(CivMenu, 'Vehicles', '', true)
-            CivVehicles:SetMenuWidthOffset(Config.MenuWidth)
-            
-			for _, Vehicle in pairs(Config.CivVehicles) do
-                local CivVehicle = NativeUI.CreateItem(Vehicle.name, '')
-                CivVehicles:AddItem(CivVehicle)
-                if Config.ShowCivSpawnCode then
-                    CivVehicle:RightLabel(Vehicle.spawncode)
+                HUK.Activated = function(ParentMenu, SelectedItem)
+                    local Ped = PlayerPedId()
+                    if (DoesEntityExist(Ped) and not IsEntityDead(Ped)) and not HandCuffed then
+                        Citizen.CreateThread(function()
+                            LoadAnimation('random@arrests')
+                            if (IsEntityPlayingAnim(Ped, 'random@arrests', 'kneeling_arrest_idle', 3)) then
+                                TaskPlayAnim(Ped, 'random@arrests', 'kneeling_arrest_get_up', 8.0, 1.0, -1, 128, 0, 0, 0, 0)
+                            else
+                                TaskPlayAnim(Ped, 'random@arrests', 'idle_2_hands_up', 8.0, 1.0, -1, 2, 0, 0, 0, 0)
+                                Wait (4000)
+                                TaskPlayAnim(Ped, 'random@arrests', 'kneeling_arrest_idle', 8.0, 1.0, -1, 2, 0, 0, 0, 0)
+                            end
+                        end)
+                    end
                 end
-                CivVehicle.Activated = function(ParentMenu, SelectedItem)
-                    SpawnVehicle(Vehicle.spawncode, Vehicle.name)
+                Inventory.Activated = function(ParentMenu, SelectedItem)
+                    local Items = KeyboardInput('Items:', 75)
+                    if Items == nil or Items == '' then
+                        Notify('~r~No Items Provided!')
+                        return
+                    end
+
+                    TriggerServerEvent('SEM_InteractionMenu:InventorySet', Items)
+                    Notify('~g~Inventory Set!')
+                end
+                BAC.Activated = function(ParentMenu, SelectedItem)
+                    local BACLevel = KeyboardInput('BAC Level - Legal Limit: 0.08', 5)
+                    if BACLevel == nil or BACLevel == '' then
+                        Notify('~r~No BAC Level Provided!')
+                        return
+                    end
+
+                    TriggerServerEvent('SEM_InteractionMenu:BACSet', tonumber(BACLevel))
+                    if tonumber(BACLevel) < 0.08 then
+                        Notify('~b~BAC Level Set: ~g~' .. tostring(BACLevel))
+                    else
+                        Notify('~b~BAC Level Set: ~r~' .. tostring(BACLevel))
+                    end
+                end
+                DropWeapon.Activated = function(ParentMenu, SelectedItem)
+                    local CurrentWeapon = GetSelectedPedWeapon(PlayerPedId())
+                    SetCurrentPedWeapon(PlayerPedId(), 'weapon_unarmed', true)
+                    SetPedDropsInventoryWeapon(GetPlayerPed(-1), CurrentWeapon, -2.0, 0.0, 0.5, 30)
+                    Notify('~r~Weapon Dropped!')
+                end
+            if Config.ShowCivAdverts then
+                local CivAdverts = _MenuPool:AddSubMenu(CivMenu, 'Adverts', 'Civilian Adverts', true)
+                CivAdverts:SetMenuWidthOffset(Config.MenuWidth)
+                    for _, Ad in pairs(Config.CivAdverts) do
+                        local Advert  = NativeUI.CreateItem(Ad.name, '')
+                        CivAdverts:AddItem(Advert)
+                        Advert.Activated = function(ParentMenu, SelectedItem)
+                            local Message = KeyboardInput('Message:', 128)
+                            if Message == nil or Message == '' then
+                                Notify('~r~No Advert Message Provided!')
+                                return
+                            end
+                
+                            TriggerServerEvent('SEM_InteractionMenu:Ads', Message, Ad.name, Ad.loc, Ad.file)
+                        end
+                    end
+            end
+            if Config.ShowCivVehicles then
+                local CivVehicles = _MenuPool:AddSubMenu(CivMenu, 'Vehicles', '', true)
+                CivVehicles:SetMenuWidthOffset(Config.MenuWidth)
+                
+                for _, Vehicle in pairs(Config.CivVehicles) do
+                    local CivVehicle = NativeUI.CreateItem(Vehicle.name, '')
+                    CivVehicles:AddItem(CivVehicle)
+                    if Config.ShowCivSpawnCode then
+                        CivVehicle:RightLabel(Vehicle.spawncode)
+                    end
+                    CivVehicle.Activated = function(ParentMenu, SelectedItem)
+                        SpawnVehicle(Vehicle.spawncode, Vehicle.name)
+                    end
                 end
             end
-		end
+    end
 
 
 
@@ -985,7 +1045,7 @@ function Menu()
 
         
 
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local EmotesList = {}
         for _, Emote in pairs(Config.EmotesList) do
             table.insert(EmotesList, Emote.name)
