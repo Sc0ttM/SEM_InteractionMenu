@@ -2921,10 +2921,10 @@ function UIMenu:ProcessControl()
             Citizen.CreateThread(function()
                 self.LeftPressed = true
                 self:GoLeft()
-                Citizen.Wait(175)
+                Citizen.Wait(275)
                 while self.Controls.Left.Enabled and (IsDisabledControlPressed(0, 174) or IsDisabledControlPressed(1, 174) or IsDisabledControlPressed(2, 174)) do
                     self:GoLeft()
-                    Citizen.Wait(125)
+                    Citizen.Wait(225)
                 end
                 self.LeftPressed = false
             end)
@@ -2936,10 +2936,10 @@ function UIMenu:ProcessControl()
             Citizen.CreateThread(function()
                 self.RightPressed = true
                 self:GoRight()
-                Citizen.Wait(175)
+                Citizen.Wait(275)
                 while self.Controls.Right.Enabled and (IsDisabledControlPressed(0, 175) or IsDisabledControlPressed(1, 175) or IsDisabledControlPressed(2, 175)) do
                     self:GoRight()
-                    Citizen.Wait(125)
+                    Citizen.Wait(225)
                 end
                 self.RightPressed = false
             end)

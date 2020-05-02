@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (menu.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support | https://semdevelopment.com/discord
 	
@@ -102,52 +102,10 @@ function Menu()
                     LEOActions:AddItem(RemoveProps)
                 end
                 Cuff.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
-                    end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-
-                    TriggerServerEvent('SEM_InteractionMenu:CuffNear', ClosestId)
+                    TriggerServerEvent('SEM_InteractionMenu:CuffNear', GetClosestPlayer())
                 end
                 Drag.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
-                    end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-
-                    TriggerServerEvent('SEM_InteractionMenu:DragNear', ClosestId)
+                    TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())
                 end
                 Seat.Activated = function(ParentMenu, SelectedItem)
                     local Ped = GetPlayerPed(-1)

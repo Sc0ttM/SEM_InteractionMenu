@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 
@@ -127,6 +127,9 @@ Config.LEOAccess = 0
     **Other Modified Version Should Work**
 ]]
 Config.RadarName = 'wk_wrs'
+
+--This determines when someone if cuffed if they can enter or exit a vehicle
+Config.VehEnterCuffed = true
 
 --This determines when you unrack/rack a weapon using the menu if the weapon will constantly stay in your hand
 Config.UnrackConstant = true

@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -53,6 +53,18 @@ function KeyboardInput(TextEntry, MaxStringLenght)
 		BlockInput = false
 		return nil
 	end
+end
+
+function GetClosestPlayer()
+    local Ped = PlayerPedId()
+
+    for _, Player in ipairs(GetActivePlayers()) do
+        local Ped2 = GetPlayerPed(Player)
+        local x, y, z = table.unpack(GetEntityCoords(Ped))
+        if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  2) then
+            return GetPlayerServerId(ID)
+        end
+    end
 end
 
 

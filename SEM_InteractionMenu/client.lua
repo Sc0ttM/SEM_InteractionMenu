@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -20,20 +20,20 @@ AddEventHandler('SEM_InteractionMenu:Cuff', function()
 	Ped = GetPlayerPed(-1)
 	if (DoesEntityExist(Ped)) then
 		Citizen.CreateThread(function()
-		    RequestAnimDict('mp_arresting')
-			while not HasAnimDictLoaded('mp_arresting') do
-				Citizen.Wait(0)
-			end
-			if isCuffed then
-				ClearPedSecondaryTask(Ped)
-				StopAnimTask(Ped, 'mp_arresting', 'idle', 3)
-				SetEnableHandcuffs(Ped, false)
-				isCuffed = false
-			else
-				TaskPlayAnim(Ped, 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
+            RequestAnimDict('mp_arresting')
+            while not HasAnimDictLoaded('mp_arresting') do
+                Citizen.Wait(0)
+            end
+
+            if isCuffed then
+                isCuffed = false
+                SetEnableHandcuffs(Ped, false)
+                ClearPedTasks(Ped)
+            else
+                isCuffed = true
 				SetEnableHandcuffs(Ped, true)
-				isCuffed = true
-			end
+				TaskPlayAnim(Ped, 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
+            end
 		end)
 	end
 end)
@@ -43,27 +43,15 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-		if isCuffed and not IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
-			Citizen.Wait(3000)
-			TaskPlayAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
-		end
-
-		if IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
-			DisableControlAction(1, 23, true) --F
+		if isCuffed then
+            if not Config.VehEnterCuffed then
+                DisableControlAction(1, 23, true) --F | Enter Vehicle
+                DisableControlAction(1, 75, true) --F | Exit Vehicle
+            end
 			DisableControlAction(1, 140, true) --R
 			DisableControlAction(1, 141, true) --Q
 			DisableControlAction(1, 142, true) --LMB
 			SetPedPathCanUseLadders(GetPlayerPed(PlayerId()), false)
-			if IsPedInAnyVehicle(GetPlayerPed(PlayerId()), false) then
-				DisableControlAction(0, 59, true) --Vehicle Driving
-			end
-		end
-
-		if IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'random@mugging3', 'handsup_standing_base', 3) then
-			DisableControlAction(1, 23, true) --F
-			DisableControlAction(1, 140, true) --R
-			DisableControlAction(1, 141, true) --Q
-			DisableControlAction(1, 142, true) --LMB
 			if IsPedInAnyVehicle(GetPlayerPed(PlayerId()), false) then
 				DisableControlAction(0, 59, true) --Vehicle Driving
 			end
@@ -706,62 +694,28 @@ RegisterCommand('onduty', function(source, args, rawCommands)
 end)
 
 RegisterCommand('cuff', function(source, args, rawCommands)
-    if args[1] ~= nil then
-        local ID = tonumber(args[1])
-        TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+    if LEORestrict() or FireRestrict() then
+        if args[1] ~= nil then
+            local ID = tonumber(args[1])
+            TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+        else
+            TriggerServerEvent('SEM_InteractionMenu:CuffNear', GetClosestPlayer())
+        end
     else
-        local Ped = GetPlayerPed(-1)
-
-        ShortestDistance = 2
-        ClosestId = 0
-
-        for ID = 0, 128 do
-            if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                Ped2 = GetPlayerPed(ID)
-                local x, y, z = table.unpack(GetEntityCoords(Ped))
-                if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                    ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                    ClosestId = GetPlayerServerId(ID)
-                end
-            end
-        end
-
-        if ClosestId == 0 then
-            Notify('~r~No Player Nearby!')
-            return
-        end
-
-        TriggerServerEvent('SEM_InteractionMenu:CuffNear', ClosestId)
+        Notify('~r~Insufficient Permissions')
     end
 end)
 
 RegisterCommand('drag', function(source, args, rawCommands)
-    if args[1] ~= nil then
-        local ID = tonumber(args[1])
-        TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+    if LEORestrict() or FireRestrict() then
+        if args[1] ~= nil then
+            local ID = tonumber(args[1])
+            TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+        else
+            TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())
+        end
     else
-        local Ped = GetPlayerPed(-1)
-
-        ShortestDistance = 2
-        ClosestId = 0
-
-        for ID = 0, 128 do
-            if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                Ped2 = GetPlayerPed(ID)
-                local x, y, z = table.unpack(GetEntityCoords(Ped))
-                if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                    ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                    ClosestId = GetPlayerServerId(ID)
-                end
-            end
-        end
-
-        if ClosestId == 0 then
-            Notify('~r~No Player Nearby!')
-            return
-        end
-
-        TriggerServerEvent('SEM_InteractionMenu:DragNear', ClosestId)
+        Notify('~r~Insufficient Permissions')
     end
 end)
 

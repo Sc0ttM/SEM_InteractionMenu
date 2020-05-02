@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -62,7 +62,8 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Ads')
 AddEventHandler('SEM_InteractionMenu:Ads', function(Text, Name, Loc, File)
-    TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File)
+	TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File)
+	TriggerClientEvent('chatMessage', -1, 'AD', {218, 255, 0}, '^*^_' .. GetPlayerName(source) .. '^r[' .. source .. '] is advertising for ^0^*' .. Name)
 end)
 
 BACList = {}
@@ -129,24 +130,20 @@ Citizen.CreateThread(function()
 	end
 
 	function VersionCheck(err, response, headers)
+		Citizen.Wait(3000)
 		if err == 200 then
 			local Data = json.decode(response)
-			if tonumber(CurrentVersion) < tonumber(Data.NewestVersion) then
-				print('Current: ' .. CurrentVersion .. '\nNewest Version: ' .. Data.NewestVersion .. '  NOT AVAILABLE')
-			end
 			
-			if CurrentVersion < Data.NewestVersion then
+			if CurrentVersion ~= Data.NewestVersion then
 				print('\n--------------------------------------------------------------------------')
 				print('\nSEM_InteractionMenu is outdated!')
 				print('Current Version: ^2' .. Data.NewestVersion .. '^7')
 				print('Your Version: ^1' .. CurrentVersion .. '^7')
 				print('Please download the lastest version from ^5' .. Data.DownloadLocation .. '^7')
 				if Data.Changes ~= '' then
-					print('\nChanges: ' .. Data.Changes)
+					print('\n^5Changes: ^7' .. Data.Changes)
 				end
 				print('\n--------------------------------------------------------------------------\n^7')
-			elseif tonumber(CurrentVersion) > tonumber(Data.NewestVersion) then
-				print('^3Your version of SEM_InteractionMenu is higher than the current version!^7')
 			else
 				print('^2SEM_InteractionMenu is up to date!^7')
 			end
