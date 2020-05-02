@@ -59,10 +59,12 @@ function GetClosestPlayer()
     local Ped = PlayerPedId()
 
     for _, Player in ipairs(GetActivePlayers()) do
-        local Ped2 = GetPlayerPed(Player)
-        local x, y, z = table.unpack(GetEntityCoords(Ped))
-        if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  2) then
-            return GetPlayerServerId(ID)
+        if GetPlayerPed(Player) ~= GetPlayerPed(-1) then
+            local Ped2 = GetPlayerPed(Player)
+            local x, y, z = table.unpack(GetEntityCoords(Ped))
+            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  2) then
+                return GetPlayerServerId(Player)
+            end
         end
     end
 end
