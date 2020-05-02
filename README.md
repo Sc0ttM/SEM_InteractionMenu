@@ -18,4 +18,4 @@ Current Changes: **• Added AD logs
 • AI Traffic manager added
 • Added hospital map markers, teleport & waypoint locations via the fire menu**
 
-This version is not recommend for public use!
+*This version is not recommend for public use!*
