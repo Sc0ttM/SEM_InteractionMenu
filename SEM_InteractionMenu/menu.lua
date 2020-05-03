@@ -104,18 +104,30 @@ function Menu()
                     LEOActions:AddItem(RemoveProps)
                 end
                 Cuff.Activated = function(ParentMenu, SelectedItem)
-                    TriggerServerEvent('SEM_InteractionMenu:CuffNear', GetClosestPlayer())
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:CuffNear', player)
+                    end
                 end
                 Drag.Activated = function(ParentMenu, SelectedItem)
-                    TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:DragNear', player)
+                    end
                 end
                 Seat.Activated = function(ParentMenu, SelectedItem)
                     local Veh = GetVehiclePedIsIn(Ped, true)
 
-                    TriggerServerEvent('SEM_InteractionMenu:SeatNear', GetClosestPlayer(), Veh)
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:SeatNear', player, Veh)
+                    end
                 end
                 Unseat.Activated = function(ParentMenu, SelectedItem)
-                    TriggerServerEvent('SEM_InteractionMenu:UnseatNear', GetClosestPlayer())
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:UnseatNear', player)
+                    end
                 end
                 Radar.Activated = function(ParentMenu, SelectedItem)
                     if GotRadar() then
@@ -136,55 +148,18 @@ function Menu()
                     end
                 end
                 Inventory.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        Notify('~b~Searching ...')
+                        TriggerServerEvent('SEM_InteractionMenu:InventorySearch', ClosestId)
                     end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-                    
-                    Notify('~b~Searching ...')
-                    TriggerServerEvent('SEM_InteractionMenu:InventorySearch', ClosestId)
                 end
                 BAC.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        Notify('~b~Testing ...')
+                        TriggerServerEvent('SEM_InteractionMenu:BACTest', ClosestId)
                     end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-                    
-                    Notify('~b~Testing ...')
-                    
-                    TriggerServerEvent('SEM_InteractionMenu:BACTest', ClosestId)
                 end
                 Jail.Activated = function(ParentMenu, SelectedItem)
                     local PlayerID = tonumber(KeyboardInput('Player ID:', 10))
@@ -499,77 +474,22 @@ function Menu()
 					FireActions:AddItem(Hospitalize)
 				end
                 Drag.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:DragNear', player)
                     end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-
-                    TriggerServerEvent('SEM_InteractionMenu:DragNear', ClosestId)
                 end
                 Seat.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-                    local Veh = GetVehiclePedIsIn(Ped, true)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:SeatNear', player, Veh)
                     end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-
-                    TriggerServerEvent('SEM_InteractionMenu:SeatNear', ClosestId, Veh)
                 end
                 Unseat.Activated = function(ParentMenu, SelectedItem)
-                    local Ped = GetPlayerPed(-1)
-
-                    ShortestDistance = 2
-                    ClosestId = 0
-
-                    for ID = 0, 128 do
-                        if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                            Ped2 = GetPlayerPed(ID)
-                            local x, y, z = table.unpack(GetEntityCoords(Ped))
-                            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                                ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                                ClosestId = GetPlayerServerId(ID)
-                            end
-                        end
+                    local player = GetClosestPlayer()
+                    if player ~= false then
+                        TriggerServerEvent('SEM_InteractionMenu:UnseatNear', player)
                     end
-
-                    if ClosestId == 0 then
-                        Notify('~r~No Player Nearby!')
-                        return
-                    end
-                    
-                    TriggerServerEvent('SEM_InteractionMenu:UnseatNear', ClosestId)
                 end
                 Hospitalize.Activated = function(ParentMenu, SelectedItem)
                     local PlayerID = tonumber(KeyboardInput('Player ID:', 10))

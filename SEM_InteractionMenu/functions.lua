@@ -67,13 +67,14 @@ function GetClosestPlayer()
             end
         end
     end
+
+    Notify('~r~No Player Nearby!')
+    return false
 end
 
 function GetDistance(ID)
     local Ped = GetPlayerPed(-1)
-    local Distance = 0
-
-    Ped2 = GetPlayerPed(ID)
+    local Ped2 = GetPlayerPed(ID)
     local x, y, z = table.unpack(GetEntityCoords(Ped))
     return GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z)
 end
