@@ -10,13 +10,8 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **dev_v1.5.3**
+Current Version: **dev_v1.5.4**
 
-Current Changes: **• Added AD logs
-• Fixed vehicle flipping when sheild is in hand
-• Updated onduty command
-• AI Traffic manager added
-• Added hospital map markers, teleport & waypoint locations via the fire menu
-• Updated GetClosestPlayer function**
+Current Changes: **• Getting closest player • Dragging crashing players**
 
 *This version is not recommend for public use!*
