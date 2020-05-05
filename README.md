@@ -14,4 +14,4 @@ Current Version: **dev_v1.5.5**
 
 Current Changes: **• Updated traffic manager position in the menu • Increased the allowed vehicle spawning time • Updated ACE permission name**
 
-*This version is not recommend for public use!*
+*This version is not recommend for public use and may be unstable or still contain issues!*
