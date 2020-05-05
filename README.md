@@ -10,8 +10,8 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **dev_v1.5.4**
+Current Version: **dev_v1.5.5**
 
-Current Changes: **• Getting closest player • Dragging crashing players**
+Current Changes: **• Updated traffic manager position in the menu • Increased the allowed vehicle spawning time • Updated ACE permission name**
 
 *This version is not recommend for public use!*
