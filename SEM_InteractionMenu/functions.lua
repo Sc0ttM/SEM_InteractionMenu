@@ -192,7 +192,7 @@ function SpawnVehicle(Veh, Name)
 
         WaitTime = WaitTime + 1
 
-        if WaitTime == 200 then
+        if WaitTime == 600 then
             CancelEvent()
             Notify('~r~Unable to load vehicle, please contact development!')
             return

@@ -276,13 +276,13 @@ Config.LEOVehiclesCategories = {
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]
 	
-	['LSPD'] = {
+	['Police'] = {
 		{name = 'Police', spawncode = 'police'},
 		{name = 'Police', spawncode = 'police2'},
 		{name = 'Police', spawncode = 'police3'},
 	},
 	
-	['BCSO'] = {
+	['Sheriff'] = {
 		{name = 'Sheriff', spawncode = 'sheriff'},
 		{name = 'Sheriff', spawncode = 'sheriff2'},
 	},

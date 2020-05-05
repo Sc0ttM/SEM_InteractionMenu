@@ -103,7 +103,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:LEOPerms')
 AddEventHandler('SEM_InteractionMenu:LEOPerms', function()
-    if IsPlayerAceAllowed(source, 'sem.leo') then
+    if IsPlayerAceAllowed(source, 'sem_intmenu.leo') then
 		TriggerClientEvent('SEM_InteractionMenu:LEOPermsResult', source, true)
 	else
 		TriggerClientEvent('SEM_InteractionMenu:LEOPermsResult', source, false)
@@ -112,7 +112,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:FirePerms')
 AddEventHandler('SEM_InteractionMenu:FirePerms', function()
-    if IsPlayerAceAllowed(source, 'sem.fire') then
+    if IsPlayerAceAllowed(source, 'sem_intmenu.fire') then
 		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, true)
 	else
 		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, false)

@@ -241,6 +241,82 @@ function Menu()
                         DeleteOBJ(Prop.spawncode)
                     end
                 end
+
+            if Config.DisplayTrafficManager then
+                local LEOTrafficManager = _MenuPool:AddSubMenu(LEOMenu, 'Traffic Manager', '', true)
+                LEOTrafficManager:SetMenuWidthOffset(Config.MenuWidth)
+        
+                AreaSize = 30.0
+                Raduies = {}
+                for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
+                    table.insert(Raduies, RaduisInfo.name)
+                end
+    
+                    local Radius = NativeUI.CreateListItem('Radius', Raduies, 1, '')
+                    local ResumeTraffic = NativeUI.CreateItem('~g~Resume ~w~Traffic', '')
+                    local SlowTraffic = NativeUI.CreateItem('~y~Slow ~w~Traffic', '')
+                    local StopTraffic = NativeUI.CreateItem('~r~Stop ~w~Traffic', '')
+                    LEOTrafficManager:AddItem(Radius)
+                    LEOTrafficManager:AddItem(ResumeTraffic)
+                    LEOTrafficManager:AddItem(SlowTraffic)
+                    LEOTrafficManager:AddItem(StopTraffic)
+                    Radius.OnListChanged = function(sender, item, index)
+                        if item == Radius then
+                            for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
+                                if RaduisInfo.name == item:IndexToItem(index) then
+                                    AreaSize = RaduisInfo.size
+                                end
+                            end
+                        end
+                    end
+                    ResumeTraffic.Activated = function(ParentMenu, SelectedItem)
+                        if Zone ~= nil then
+                            RemoveSpeedZone(Zone)
+                            RemoveBlip(Area)
+                            Notify("Traffic ~g~Resumed")
+                            Zone = nil
+                            if Zone2 then
+                                RemoveSpeedZone(Zone2)
+                                RemoveBlip(Area2)
+                            end
+                        end
+                    end
+                    SlowTraffic.Activated = function(ParentMenu, SelectedItem)
+                        if Zone ~= nil then 
+                            RemoveSpeedZone(Zone)
+                            Notify("Traffic ~g~Resumed")
+                            Zone = nil
+                            RemoveBlip(Area)
+                        else
+                            Notify("Traffic ~y~Slowed")
+                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
+                            SetBlipAlpha(Area, 80)
+                            SetBlipColour(Area, 28)
+                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 5.0, false)
+                        end
+                    end
+                    StopTraffic.Activated = function(ParentMenu, SelectedItem)
+                        if Zone ~= nil then 
+                            RemoveSpeedZone(Zone)
+                            RemoveSpeedZone(Zone2)
+                            RemoveBlip(Area)
+                            RemoveBlip(Area2)
+                            Notify("Traffic ~g~Resumed")
+                            Zone = nil
+                        else
+                            Notify("Traffic ~r~Stopped")
+                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
+                            Area2 = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize + 20.0)
+                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 0.0, false)
+                            Zone2 = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize + 20.0, 0.0, false)
+                            SetBlipAlpha(Area, 90)
+                            SetBlipAlpha(Area2, 80)
+                            SetBlipColour(Area, 1)
+                            SetBlipColour(Area2, 1)
+                        end
+                    end
+            end
+
             if Config.DisplayBackup then
                 local LEOBackup = _MenuPool:AddSubMenu(LEOMenu, 'Backup', '', true)
                 LEOBackup:SetMenuWidthOffset(Config.MenuWidth)
@@ -377,81 +453,6 @@ function Menu()
                         end
                     end
                 end
-            end
-
-            if Config.DisplayTrafficManager then
-                local LEOTrafficManager = _MenuPool:AddSubMenu(LEOMenu, 'Traffic Manager', '', true)
-                LEOTrafficManager:SetMenuWidthOffset(Config.MenuWidth)
-    
-                AreaSize = 30.0
-                Raduies = {}
-                for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
-                    table.insert(Raduies, RaduisInfo.name)
-                end
-
-                    local Radius = NativeUI.CreateListItem('Radius', Raduies, 1, '')
-                    local ResumeTraffic = NativeUI.CreateItem('~g~Resume ~w~Traffic', '')
-                    local SlowTraffic = NativeUI.CreateItem('~y~Slow ~w~Traffic', '')
-                    local StopTraffic = NativeUI.CreateItem('~r~Stop ~w~Traffic', '')
-                    LEOTrafficManager:AddItem(Radius)
-                    LEOTrafficManager:AddItem(ResumeTraffic)
-                    LEOTrafficManager:AddItem(SlowTraffic)
-                    LEOTrafficManager:AddItem(StopTraffic)
-                    Radius.OnListChanged = function(sender, item, index)
-                        if item == Radius then
-                            for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
-                                if RaduisInfo.name == item:IndexToItem(index) then
-                                    AreaSize = RaduisInfo.size
-                                end
-                            end
-                        end
-                    end
-                    ResumeTraffic.Activated = function(ParentMenu, SelectedItem)
-                        if Zone ~= nil then
-                            RemoveSpeedZone(Zone)
-                            RemoveBlip(Area)
-                            Notify("Traffic ~g~Resumed")
-                            Zone = nil
-                            if Zone2 then
-                                RemoveSpeedZone(Zone2)
-                                RemoveBlip(Area2)
-                            end
-                        end
-                    end
-                    SlowTraffic.Activated = function(ParentMenu, SelectedItem)
-                        if Zone ~= nil then 
-                            RemoveSpeedZone(Zone)
-                            Notify("Traffic ~g~Resumed")
-                            Zone = nil
-                            RemoveBlip(Area)
-                        else
-                            Notify("Traffic ~y~Slowed")
-                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
-                            SetBlipAlpha(Area, 80)
-                            SetBlipColour(Area, 28)
-                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 5.0, false)
-                        end
-                    end
-                    StopTraffic.Activated = function(ParentMenu, SelectedItem)
-                        if Zone ~= nil then 
-                            RemoveSpeedZone(Zone)
-                            RemoveSpeedZone(Zone2)
-                            RemoveBlip(Area)
-                            RemoveBlip(Area2)
-                            Notify("Traffic ~g~Resumed")
-                            Zone = nil
-                        else
-                            Notify("Traffic ~r~Stopped")
-                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
-                            Area2 = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize + 20.0)
-                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 0.0, false)
-                            Zone2 = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize + 20.0, 0.0, false)
-                            SetBlipAlpha(Area, 90)
-                            SetBlipAlpha(Area2, 80)
-                            SetBlipColour(Area, 1)
-                            SetBlipColour(Area2, 1)
-                        end
-                    end
             end
     end
 
