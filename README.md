@@ -10,8 +10,8 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **dev_v1.5.5**
+Current Version: **dev_v1.5.6**
 
-Current Changes: **• Updated traffic manager position in the menu • Increased the allowed vehicle spawning time • Updated ACE permission name**
+Current Changes: **• Updated traffic manager position in the menu • Updates Station & Backup Blips to only be dispalyed when close**
 
 *This version is not recommend for public use and may be unstable or contain issues!*
