@@ -269,13 +269,14 @@ AddEventHandler('SEM_InteractionMenu:CallBackup', function(Code, StreetName, Coo
             SetBlipDisplay(BackupBlip, 4)
             SetBlipScale(BackupBlip, Size)
             SetBlipColour(BackupBlip, Colour)
+            SetBlipAsShortRange(BackupBlip, true)
         
             BeginTextCommandSetBlipName('STRING')
             AddTextComponentString(Name)
             EndTextCommandSetBlipName(BackupBlip)
             table.insert(BackupBlips, BackupBlip)
             Citizen.Wait(Config.BackupBlipTimeout * 60000)
-            for _, Blip in pairs(BackupBlips) do 
+            for _, Blip in pairs(BackupBlips) do
                 RemoveBlip(Blip)
             end
         end
@@ -292,6 +293,9 @@ AddEventHandler('SEM_InteractionMenu:CallBackup', function(Code, StreetName, Coo
         elseif Code == 99 then
             Notify('An officer is requesting ~r~Code 99 ~w~backup at ~b~' .. StreetName)
             CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 99 Backup Requested', 56, 1.2, 49)
+        elseif Code == 'panic' then
+            Notify('An officer has pressed their ~r~Panic Button ~w~at ~b~' .. StreetName)
+            CreateBlip(Coords.x, Coords.y, Coords.z, 'Panic Button Pressed', 103, 1.2, 49)
         end
     end
 end)
@@ -382,23 +386,23 @@ Citizen.CreateThread(function()
         local Veh = GetVehiclePedIsIn(Ped)
         local CurrentWeapon = GetSelectedPedWeapon(Ped)
         
-        if CarbineEquipped then
-            if (tostring(CurrentWeapon) ~= '-2084633992') and Veh == nil then
-                Notify('~y~You must put away your Carbine Rifle')
-            end
-
-            if Config.UnrackConstant then
+        if Config.UnrackWeapons then
+            if CarbineEquipped then
                 SetCurrentPedWeapon(Ped, 'weapon_carbinerifle', true)
+            else
+                if (tostring(CurrentWeapon) == '-2084633992') then
+                    Notify('~o~You need to unrack your rifle before you can use it')
+                    SetCurrentPedWeapon(Ped, 'weapon_unarmed', true)
+                end
             end
-        end
-        
-        if ShotgunEquipped then
-            if tostring(CurrentWeapon) ~= '487013001' and Veh == nil then
-                Notify('~y~You must put away your Shotgun')
-            end
-
-            if Config.UnrackConstant then
+            
+            if ShotgunEquipped then
                 SetCurrentPedWeapon(Ped, 'weapon_pumpshotgun', true)
+            else
+                if tostring(CurrentWeapon) == '487013001' then
+                    Notify('~o~You need to unrack your shotgun before you can use it')
+                    SetCurrentPedWeapon(Ped, 'weapon_unarmed', true)
+                end
             end
         end
     end
@@ -474,7 +478,7 @@ CurrentlyHospitalized = false
 EarlyDischarge = false
 OriginalHospitalTime = 0
 RegisterNetEvent('SEM_InteractionMenu:HospitalizePlayer')
-AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
+AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, HospitalLocation)
     if CurrentlyHospitaled then
         return
     end
@@ -487,8 +491,8 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
     local Ped = GetPlayerPed(-1)
     if DoesEntityExist(Ped) then
         Citizen.CreateThread(function()
-            SetEntityCoords(Ped, Config.HospitalLocation.Hospital.x, Config.HospitalLocation.Hospital.y, Config.HospitalLocation.Hospital.z)
-            SetEntityHeading(Ped, Config.HospitalLocation.Hospital.h)
+            SetEntityCoords(Ped, HospitalLocation.x, HospitalLocation.y, HospitalLocation.z)
+            SetEntityHeading(Ped, HospitalLocation.h)
             CurrentlyHospitaled = true
 
             while HospitalTime >= 0 and not EarlyDischarge do
@@ -508,10 +512,10 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
                 Citizen.Wait(1000)
 
                 local Location = GetEntityCoords(Ped, true)
-				local Distance = Vdist(Config.HospitalLocation.Hospital.x, Config.HospitalLocation.Hospital.y, Config.HospitalLocation.Hospital.z, Location['x'], Location['y'], Location['z'])
-				if Distance > 50 then
-                    SetEntityCoords(Ped, Config.HospitalLocation.Hospital.x, Config.HospitalLocation.Hospital.y, Config.HospitalLocation.Hospital.z)
-                    SetEntityHeading(Ped, Config.HospitalLocation.Hospital.h)
+				local Distance = Vdist(HospitalLocation.x, HospitalLocation.y, HospitalLocation.z, Location['x'], Location['y'], Location['z'])
+				if Distance > 30 then
+                    SetEntityCoords(Ped, HospitalLocation.x, HospitalLocation.y, HospitalLocation.z)
+                    SetEntityHeading(Ped, HospitalLocation.h)
 					TriggerEvent('chat:addMessage', {
                         multiline = true,
                         color = {86, 96, 252},
@@ -557,6 +561,7 @@ Citizen.CreateThread(function()
             end
             SetBlipScale(StationBlip, 1.0)
             SetBlipColour(StationBlip, Colour)
+            SetBlipAsShortRange(StationBlip, true)
         
             BeginTextCommandSetBlipName('STRING')
             AddTextComponentString(Name)

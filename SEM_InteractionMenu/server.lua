@@ -91,8 +91,8 @@ AddEventHandler('SEM_InteractionMenu:InventorySearch', function(ID)
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Hospitalize')
-AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time)
-	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time)
+AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time, Location)
+	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time, Location)
 	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' second(s)')
 end)
 
@@ -122,7 +122,10 @@ end)
 
 
 Citizen.CreateThread(function()
-	local CurrentVersion = json.decode(LoadResourceFile(GetCurrentResourceName(), 'version.json')).version
+	local CurrentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
+	if not CurrentVersion then
+		print('^1SEM_InteractionMenu Version Check Failed!^7')
+	end
 
 	function VersionCheckHTTPRequest()
 		PerformHttpRequest('https://semdevelopment.com/releases/interactionmenu/info/version.json', VersionCheck, 'GET')

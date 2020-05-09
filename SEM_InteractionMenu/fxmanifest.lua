@@ -17,11 +17,11 @@
 fx_version 'bodacious'
 games {'gta5'}
 
-
+--DO NOT REMOVE THESE
 title 'SEM_InteractionMenu'
 description 'Multi Purpose Interaction Menu'
 author 'Scott M [SEM Development]'
-version 'v1.5'
+version 'v1.5' --This is required for the version checker, DO NOT change or remove
 
 client_scripts {
     'dependencies/NativeUI.lua',

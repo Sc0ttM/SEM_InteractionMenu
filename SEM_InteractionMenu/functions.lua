@@ -147,15 +147,6 @@ function DisableShield()
     ShieldActive = false
 end
 
-function GotRadar()
-    local RadarFiles = LoadResourceFile(Config.RadarName, '__resource.lua')
-    if RadarFiles then
-        return true
-    else
-        return false
-    end
-end
-
 
 
 --Civ Functions
@@ -201,9 +192,8 @@ function SpawnVehicle(Veh, Name)
     local x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), false))
     local Vehicle = CreateVehicle(Model, x + 2, y + 2, z + 1, GetEntityHeading(PlayerPedId()), true, false)
     SetPedIntoVehicle(PlayerPedId(), Vehicle, -1)
-    SetEntityAsNoLongerNeeded(Vehicle)
-    SetModelAsNoLongerNeeded(Vehicle)
     SetVehicleDirtLevel(Vehicle, 0)
+    SetModelAsNoLongerNeeded(Model)
 
     if Name then
         Notify('~b~Vehicle Spawned: ~g~' .. Name)
