@@ -10,12 +10,17 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.4**
+Current Version: **v1.5**
 
-Changes: **Fixed Jail & Hospital Config Option Operating Incorrectly**
+Changes: **• Added Wraith ARS 2x Radar Support • Added AD "Logs" • Distance Checking when using** `/cuff` or `/drag` **• AI Traffic Manager • Updated Version Checker • Updated ACE Permissions • and alot more!**
 
-Support/Discord: https://semdevelopment.com/discord
 
-Information/Instructions: https://semdevelopment.com/releases/interactionmenu
+### Links:
 
-*For full changes checkout https://semdevelopment.com/releases/interactionmenu/changelog*
+Support/Discord: [Click Here](https://semdevelopment.com/discord)
+
+Information: [Click Here](https://semdevelopment.com/releases/interactionmenu)
+
+Instruction/Docs: [Click here](https://docs.semdevelopment.com/fivem/interactionmenu)
+
+*For full changes checkout [here](https://semdevelopment.com/releases/interactionmenu/changelog)*
