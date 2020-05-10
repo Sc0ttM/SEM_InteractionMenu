@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 
@@ -27,7 +27,7 @@ Config.OpenMenu = 0
 
 --This is the button that will open the menu (If chosen at Config.OpenMenu)
 --Default = 244 [M]  |  To change the button check out https://docs.fivem.net/game-references/controls/
---Controller Support for this resource is DISABLED
+--Controller Support for this resource is DISABLED!
 Config.MenuButton = 244
 
 --This is the command that will open the menu (If chosen at Config.OpenMenu)
@@ -73,8 +73,15 @@ Config.MenuTitleCustom = 'Custom Menu Title'
 --                                                           --
 ---------------------------------------------------------------
 
---This is the onduty password, only people with the password can access the menu if chosen at Config.LEOAccess/Config.FireAccess (If you wish NOT to have the password but still use the command set it to '')
-Config.OndutyPSWD = ''
+--This determines if the onduty password is active, if false the password will NOT be required when doing the command
+Config.OndutyPSWDActive = false
+
+--This is the onduty password, only people with the password can access the menu if chosen at Config.LEOAccess/Config.FireAccess
+Config.OndutyPSWD = 'OndutyPSWD'
+
+--This determines how close you need to be to cuff/drag someone using their ID
+--Default = 100
+Config.CommandDistance = 100
 
 --This determines if the stations section of the LEO & Fire menu will be visible
 --Station Locations can be set at Config.LEOStations & Config.FireStations
@@ -114,22 +121,28 @@ Config.StationBlipsDispalyed = 0
 
 --This sets who can access the LEO menu
 --!!! NOTE: If LEO Peds is selected then onlys peds from the Config.LEOUniforms will have access to the menu
---Everyone = 0 [Default]  |  LEO Peds = 1  |  Onduty Command = 2  |  Ace Permissions = 3
-Config.LEOAccess = 0
+--Disabled = 0 | Everyone = 1 [Default]  |  LEO Peds = 2  |  Onduty Command = 3  |  Ace Permissions = 4
+Config.LEOAccess = 1
 
---This is the resource name of the police radar script, this has to be set correctly (It is case sensative!)
---NOTE: Wraith Radar is the ONLY radar script that works with the menu at the moment (This also includes any editied version) - Only the old version 'WraithRS | Advanced Radar System' works link below
+--This determines if the radar button will be displayed
+--NOTE: Wraith Radar is the ONLY radar script that works with the menu at the moment (This also includes any editied version) - Both his old and new radar are compatiable, link below
 --[[
     Links:
-        Wraith Radar: https://forum.cfx.re/t/release-wraithrs-advanced-radar-system-1-0-2/48543
+        WraithRS | Advanced Radar System: https://forum.cfx.re/t/release-wraithrs-advanced-radar-system-1-0-2/48543
         Ascaped Plate Reader Edit: https://forum.cfx.re/t/release-edit-wraithrs-new-plate-reader/147269
 
-    **Other Modified Version Should Work**
-]]
-Config.RadarName = 'wk_wrs'
+        Wraith ARS 2X Radar & Plate Reader: https://forum.cfx.re/t/release-wraith-ars-2x-police-radar-and-plate-reader-v1-2-4/1058277
 
---This determines when you unrack/rack a weapon using the menu if the weapon will constantly stay in your hand
-Config.UnrackConstant = true
+    **Other modified version of these resoruce should work**
+]]
+--Disabled = 0 [Default] | Wraith ARS 2x = 1 |  WraithRS = 2
+Config.Radar = 0
+
+--This determines when someone if cuffed if they can enter or exit a vehicle
+Config.VehEnterCuffed = true
+
+--This determines if you need to unrack the carbine rifle of pumpshotun from a vehicle to obtain it
+Config.UnrackWeapons = true
 
 --This sets if the Jail functions will be visible in the menu
 Config.LEOJail = true
@@ -190,6 +203,9 @@ Config.LEOStations = {
     {name = 'NOOSE Headquarters', coords = {x = 2504.29, y = -384.11, z = 94.12, h = 264.01}},
 }
 
+--This determines if the LEO Unfiroms section will be visible
+Config.DisplayLEOUniforms = true
+
 --These are the LEO uniforms that are available via the loadouts - these will also be the uniforms which will give access to the LEO menu if that option if chosen at Config.LEOAccess
 Config.LEOUniforms = {
     --[[
@@ -205,6 +221,9 @@ Config.LEOUniforms = {
     {name = 'SWAT', spawncode = 's_m_y_swat_01'},
     {name = 'Undercover', spawncode = 's_m_m_ciasec_01'},
 }
+
+--This determines if the LEO Loadouts section will be visible
+Config.DisplayLEOLoadouts = true
 
 --These are the weapon loadouts available via the loadouts
 Config.LEOLoadouts = {
@@ -265,14 +284,14 @@ Config.LEOVehiclesCategories = {
 
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]
-	
-	['LSPD'] = {
+
+    ['Police'] = {
 		{name = 'Police', spawncode = 'police'},
 		{name = 'Police', spawncode = 'police2'},
 		{name = 'Police', spawncode = 'police3'},
 	},
 	
-	['BCSO'] = {
+	['Sheriff'] = {
 		{name = 'Sheriff', spawncode = 'sheriff'},
 		{name = 'Sheriff', spawncode = 'sheriff2'},
 	},
@@ -280,6 +299,19 @@ Config.LEOVehiclesCategories = {
     ['Unmarked'] = {
         {name = 'Unmarked', spawncode = 'police4'},
     },
+}
+
+--This determines if the ai traffic manager will can accessible
+Config.DisplayTrafficManager = true
+
+--This determines what radius are avaiable via the traffic manager
+Config.AvaliableRaduies = {
+    {name = 'Tiny', size = 15.0},
+    {name = 'Small', size = 30.0},
+    {name = 'Medium', size = 40.0},
+    {name = 'Large', size = 50.0},
+    {name = 'Ex Large', size = 60.0},
+    {name = 'Mega', size = 80.0}
 }
 
 
@@ -306,8 +338,8 @@ Config.LEOVehiclesCategories = {
 
 --This sets who can access the Fire menu
 --!!! NOTE: If Fire Peds is selected then onlys peds from the Config.FireUniforms will have access to the menu
---Everyone = 0 [Default]  |  Fire Peds = 1  |  Onduty Command = 2  |  Ace Permissions = 3
-Config.FireAccess = 0
+--Disabled = 0 | Everyone = 1 [Default]  |  Fire Peds = 2  |  Onduty Command = 3  |  Ace Permissions = 4
+Config.FireAccess = 1
 
 --This sets if the Hospitalize functions will be visible in the menu
 Config.FireHospital = true
@@ -318,8 +350,14 @@ Config.MaxHospitalTime = 300
 --These is the location of the hospital and release point
 --I would recommend using a MLO Interior/Ymap for the hospital
 Config.HospitalLocation = {
-    Hospital = {x = 358.34, y = -589.98, z = 28.79, h = 257.19},
-    Release = {x = 372.78, y = -595.04, z = 28.84, h = 248.29},
+    ['Pillbox Hill'] = {
+        Hospital = {x = 358.34, y = -589.98, z = 28.79, h = 257.19},
+        Release = {x = 372.78, y = -595.04, z = 28.84, h = 248.29},
+    },
+    ['Paleto Bay'] = {
+        Hospital = {x = -247.34, y = 6332.39, z = 32.42 , h = 226.90},
+        Release = {x = -247.34, y = 6332.39, z = 32.42 , h = 226.90},
+    }
 }
 
 --This sets the unhospital password
@@ -336,6 +374,18 @@ Config.FireStations = {
     {name = 'El Burro Heights', coords = {x = 1191.83, y = -1461.74, z = 34.88, h = 329.54}},
 }
 
+--These are the locations of hospitals avaiable via the hospital menu
+Config.HospitalStations = {
+    {name = 'Sandy Shores', coords = {x = 1839.13, y = 3673.26, z = 34.27 , h = 210.83}},
+    {name = 'Paleto Bay', coords = {x = -247.34, y = 6332.39, z = 32.42 , h = 226.90}},
+    
+    {name = 'Pillbox', coords = {x = 357.19, y = -593.46, z = 28.78, h = 260.70}},
+    {name = 'Davis', coords = {x = 294.59, y = -1448.17, z = 29.96, h = 320.92}},
+}
+
+--This determines if the LEO Unfiroms section will be visible
+Config.DisplayFireUniforms = true
+
 --These are the Fire uniforms that are available via the loadouts - these will also be the uniforms which will give access to the Fire menu if that option if chosen at Config.FireAccess
 Config.FireUniforms = {
     --[[
@@ -348,6 +398,9 @@ Config.FireUniforms = {
     {name = 'Firefighter', spawncode = 's_m_y_fireman_01'},
     {name = 'Paramedic', spawncode = 's_m_m_paramedic_01'},
 }
+
+--This determines if the LEO Loadouts section will be visible
+Config.DisplayFireLoadouts = true
 
 --This determines if the Fire vehicles section if available
 Config.ShowFireVehicles = true
@@ -394,6 +447,11 @@ Config.FireVehicles = {
 --                                                           --
 ---------------------------------------------------------------
 
+--This sets who can access the Civlian menu
+--!!! NOTE: If Fire Peds is selected then onlys peds from the Config.FireUniforms will have access to the menu
+--Disabled = 0 | Everyone = 1 [Default]
+Config.CivAccess = 1
+
 --This determines if the Civilian vehicles section if available
 Config.ShowCivVehicles = true
 
@@ -416,6 +474,7 @@ Config.CivVehicles = {
 }
 
 --This determines if the civilian adverts sections of the menu if visible
+--NOTE: When someone sends an advert it will display the company name and then "Advertisement ##", this is the Server ID of the person that sent the advert
 Config.ShowCivAdverts = true
 
 --These are the adverts that are avaiable via the ads menu
@@ -477,8 +536,8 @@ Config.CivAdverts = {
 ---------------------------------------------------------------
 
 --This sets when players can access the vehicle menu
---All the Time = 0 [Default] | When in Vehicle = 1
-Config.VehicleAccess = 0
+--Disabled = 0 | All the Time = 1 [Default] | When in Vehicle = 2
+Config.VehicleAccess = 1
 
 --This determines if the vehicle options are avaiable, these include: Fix, Clean, Delete
 Config.VehicleOptions = true
@@ -504,6 +563,10 @@ Config.VehicleOptions = true
 --                       Emote Features                      --
 --                                                           --
 ---------------------------------------------------------------
+
+--This sets which players can access the emote menu
+--Disabled = 0 | Everyone = 1 [Default]
+Config.EmoteAccess = 1
 
 --This determins if the emotes will be available via the menu or command
 Config.DisplayEmotes = true

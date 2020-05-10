@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -26,6 +26,10 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
+	if ID == source then
+		return
+	end
+	
 	TriggerClientEvent('Drag', ID, source)
 end)
 
@@ -47,7 +51,7 @@ end)
 RegisterServerEvent('SEM_InteractionMenu:Jail')
 AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
 	TriggerClientEvent('SEM_InteractionMenu:JailPlayer', ID, Time)
-	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' seconds')
+	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' second(s)')
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unjail')
@@ -62,7 +66,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Ads')
 AddEventHandler('SEM_InteractionMenu:Ads', function(Text, Name, Loc, File)
-    TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File)
+	TriggerClientEvent('SEM_InteractionMenu:SyncAds', -1, Text, Name, Loc, File, source)
 end)
 
 BACList = {}
@@ -91,9 +95,9 @@ AddEventHandler('SEM_InteractionMenu:InventorySearch', function(ID)
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Hospitalize')
-AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time)
-	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time)
-	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' seconds')
+AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time, Location)
+	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time, Location)
+	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' second(s)')
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unhospitalize')
@@ -103,7 +107,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:LEOPerms')
 AddEventHandler('SEM_InteractionMenu:LEOPerms', function()
-    if IsPlayerAceAllowed(source, 'sem.leo') then
+    if IsPlayerAceAllowed(source, 'sem_intmenu.leo') then
 		TriggerClientEvent('SEM_InteractionMenu:LEOPermsResult', source, true)
 	else
 		TriggerClientEvent('SEM_InteractionMenu:LEOPermsResult', source, false)
@@ -112,7 +116,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:FirePerms')
 AddEventHandler('SEM_InteractionMenu:FirePerms', function()
-    if IsPlayerAceAllowed(source, 'sem.fire') then
+    if IsPlayerAceAllowed(source, 'sem_intmenu.fire') then
 		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, true)
 	else
 		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, false)
@@ -122,31 +126,30 @@ end)
 
 
 Citizen.CreateThread(function()
-	local CurrentVersion = json.decode(LoadResourceFile(GetCurrentResourceName(), 'version.json')).version
+	local CurrentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
+	if not CurrentVersion then
+		print('^1SEM_InteractionMenu Version Check Failed!^7')
+	end
 
 	function VersionCheckHTTPRequest()
 		PerformHttpRequest('https://semdevelopment.com/releases/interactionmenu/info/version.json', VersionCheck, 'GET')
 	end
 
 	function VersionCheck(err, response, headers)
+		Citizen.Wait(3000)
 		if err == 200 then
 			local Data = json.decode(response)
-			if tonumber(CurrentVersion) < tonumber(Data.NewestVersion) then
-				print('Current: ' .. CurrentVersion .. '\nNewest Version: ' .. Data.NewestVersion .. '  NOT AVAILABLE')
-			end
 			
-			if CurrentVersion < Data.NewestVersion then
+			if CurrentVersion ~= Data.NewestVersion then
 				print('\n--------------------------------------------------------------------------')
 				print('\nSEM_InteractionMenu is outdated!')
 				print('Current Version: ^2' .. Data.NewestVersion .. '^7')
 				print('Your Version: ^1' .. CurrentVersion .. '^7')
 				print('Please download the lastest version from ^5' .. Data.DownloadLocation .. '^7')
 				if Data.Changes ~= '' then
-					print('\nChanges: ' .. Data.Changes)
+					print('\n^5Changes: ^7' .. Data.Changes)
 				end
 				print('\n--------------------------------------------------------------------------\n^7')
-			elseif tonumber(CurrentVersion) > tonumber(Data.NewestVersion) then
-				print('^3Your version of SEM_InteractionMenu is higher than the current version!^7')
 			else
 				print('^2SEM_InteractionMenu is up to date!^7')
 			end

@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -20,20 +20,20 @@ AddEventHandler('SEM_InteractionMenu:Cuff', function()
 	Ped = GetPlayerPed(-1)
 	if (DoesEntityExist(Ped)) then
 		Citizen.CreateThread(function()
-		    RequestAnimDict('mp_arresting')
-			while not HasAnimDictLoaded('mp_arresting') do
-				Citizen.Wait(0)
-			end
-			if isCuffed then
-				ClearPedSecondaryTask(Ped)
-				StopAnimTask(Ped, 'mp_arresting', 'idle', 3)
-				SetEnableHandcuffs(Ped, false)
-				isCuffed = false
-			else
-				TaskPlayAnim(Ped, 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
+            RequestAnimDict('mp_arresting')
+            while not HasAnimDictLoaded('mp_arresting') do
+                Citizen.Wait(0)
+            end
+
+            if isCuffed then
+                isCuffed = false
+                SetEnableHandcuffs(Ped, false)
+                ClearPedTasks(Ped)
+            else
+                isCuffed = true
 				SetEnableHandcuffs(Ped, true)
-				isCuffed = true
-			end
+				TaskPlayAnim(Ped, 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
+            end
 		end)
 	end
 end)
@@ -43,27 +43,15 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-		if isCuffed and not IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
-			Citizen.Wait(3000)
-			TaskPlayAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
-		end
-
-		if IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
-			DisableControlAction(1, 23, true) --F
+		if isCuffed then
+            if not Config.VehEnterCuffed then
+                DisableControlAction(1, 23, true) --F | Enter Vehicle
+                DisableControlAction(1, 75, true) --F | Exit Vehicle
+            end
 			DisableControlAction(1, 140, true) --R
 			DisableControlAction(1, 141, true) --Q
 			DisableControlAction(1, 142, true) --LMB
 			SetPedPathCanUseLadders(GetPlayerPed(PlayerId()), false)
-			if IsPedInAnyVehicle(GetPlayerPed(PlayerId()), false) then
-				DisableControlAction(0, 59, true) --Vehicle Driving
-			end
-		end
-
-		if IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'random@mugging3', 'handsup_standing_base', 3) then
-			DisableControlAction(1, 23, true) --F
-			DisableControlAction(1, 140, true) --R
-			DisableControlAction(1, 141, true) --Q
-			DisableControlAction(1, 142, true) --LMB
 			if IsPedInAnyVehicle(GetPlayerPed(PlayerId()), false) then
 				DisableControlAction(0, 59, true) --Vehicle Driving
 			end
@@ -89,13 +77,12 @@ Citizen.CreateThread(function()
         if Drag then
             local Ped = GetPlayerPed(GetPlayerFromServerId(OfficerDrag))
             local Ped2 = PlayerPedId()
-            AttachEntityToEntity(Ped2, Ped, 4103, 11816, 0.48, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-            StillDragged = true
+            AttachEntityToEntity(Ped2, Ped, 4103, 0.35, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+            DisableControlAction(1, 140, true) --R
+			DisableControlAction(1, 141, true) --Q
+			DisableControlAction(1, 142, true) --LMB
         else
-            if(StillDragged) then
-                DetachEntity(PlayerPedId(), true, false)
-                StillDragged = false
-            end
+            DetachEntity(PlayerPedId(), true, false)
         end
     end
 end)
@@ -281,13 +268,14 @@ AddEventHandler('SEM_InteractionMenu:CallBackup', function(Code, StreetName, Coo
             SetBlipDisplay(BackupBlip, 4)
             SetBlipScale(BackupBlip, Size)
             SetBlipColour(BackupBlip, Colour)
+            SetBlipAsShortRange(BackupBlip, true)
         
             BeginTextCommandSetBlipName('STRING')
             AddTextComponentString(Name)
             EndTextCommandSetBlipName(BackupBlip)
             table.insert(BackupBlips, BackupBlip)
             Citizen.Wait(Config.BackupBlipTimeout * 60000)
-            for _, Blip in pairs(BackupBlips) do 
+            for _, Blip in pairs(BackupBlips) do
                 RemoveBlip(Blip)
             end
         end
@@ -300,10 +288,13 @@ AddEventHandler('SEM_InteractionMenu:CallBackup', function(Code, StreetName, Coo
             CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 2 Backup Requested', 56, 0.8, 17)
         elseif Code == 3 then
             Notify('An officer is requesting ~r~Code 3 ~w~backup at ~b~' .. StreetName)
-            CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 3 Backup Requested', 56, 0.8, 49)
+            CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 3 Backup Requested', 56, 1.0, 49)
         elseif Code == 99 then
             Notify('An officer is requesting ~r~Code 99 ~w~backup at ~b~' .. StreetName)
             CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 99 Backup Requested', 56, 1.2, 49)
+        elseif Code == 'panic' then
+            Notify('An officer has pressed their ~r~Panic Button ~w~at ~b~' .. StreetName)
+            CreateBlip(Coords.x, Coords.y, Coords.z, 'Panic Button Pressed', 103, 1.2, 49)
         end
     end
 end)
@@ -366,7 +357,7 @@ AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
             if EarlyRelease then
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail on Parole')
             else
-                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail after ' .. OriginalJailTime .. ' seconds.')
+                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail after ' .. OriginalJailTime .. ' second(s).')
             end
             SetEntityCoords(Ped, Config.JailLocation.Release.x, Config.JailLocation.Release.y, Config.JailLocation.Release.z)
             SetEntityHeading(Ped, Config.JailLocation.Release.h)
@@ -394,23 +385,23 @@ Citizen.CreateThread(function()
         local Veh = GetVehiclePedIsIn(Ped)
         local CurrentWeapon = GetSelectedPedWeapon(Ped)
         
-        if CarbineEquipped then
-            if (tostring(CurrentWeapon) ~= '-2084633992') and Veh == nil then
-                Notify('~y~You must put away your Carbine Rifle')
-            end
-
-            if Config.UnrackConstant then
+        if Config.UnrackWeapons then
+            if CarbineEquipped then
                 SetCurrentPedWeapon(Ped, 'weapon_carbinerifle', true)
+            else
+                if (tostring(CurrentWeapon) == '-2084633992') then
+                    Notify('~o~You need to unrack your rifle before you can use it')
+                    SetCurrentPedWeapon(Ped, 'weapon_unarmed', true)
+                end
             end
-        end
-        
-        if ShotgunEquipped then
-            if tostring(CurrentWeapon) ~= '487013001' and Veh == nil then
-                Notify('~y~You must put away your Shotgun')
-            end
-
-            if Config.UnrackConstant then
+            
+            if ShotgunEquipped then
                 SetCurrentPedWeapon(Ped, 'weapon_pumpshotgun', true)
+            else
+                if tostring(CurrentWeapon) == '487013001' then
+                    Notify('~o~You need to unrack your shotgun before you can use it')
+                    SetCurrentPedWeapon(Ped, 'weapon_unarmed', true)
+                end
             end
         end
     end
@@ -442,8 +433,8 @@ end)
 
 --Civilian Adverts
 RegisterNetEvent('SEM_InteractionMenu:SyncAds')
-AddEventHandler('SEM_InteractionMenu:SyncAds',function(Text, Name, Loc, File)
-    Ad(Text, Name, Loc, File)
+AddEventHandler('SEM_InteractionMenu:SyncAds',function(Text, Name, Loc, File, ID)
+    Ad(Text, Name, Loc, File, ID)
 end)
 
 
@@ -486,7 +477,7 @@ CurrentlyHospitalized = false
 EarlyDischarge = false
 OriginalHospitalTime = 0
 RegisterNetEvent('SEM_InteractionMenu:HospitalizePlayer')
-AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
+AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, HospitalLocation)
     if CurrentlyHospitaled then
         return
     end
@@ -499,8 +490,8 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
     local Ped = GetPlayerPed(-1)
     if DoesEntityExist(Ped) then
         Citizen.CreateThread(function()
-            SetEntityCoords(Ped, Config.HospitalLocation.Hospital.x, Config.HospitalLocation.Hospital.y, Config.HospitalLocation.Hospital.z)
-            SetEntityHeading(Ped, Config.HospitalLocation.Hospital.h)
+            SetEntityCoords(Ped, HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z)
+            SetEntityHeading(Ped, HospitalLocation.Hospital.h)
             CurrentlyHospitaled = true
 
             while HospitalTime >= 0 and not EarlyDischarge do
@@ -520,10 +511,10 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
                 Citizen.Wait(1000)
 
                 local Location = GetEntityCoords(Ped, true)
-				local Distance = Vdist(Config.HospitalLocation.Hospital.x, Config.HospitalLocation.Hospital.y, Config.HospitalLocation.Hospital.z, Location['x'], Location['y'], Location['z'])
-				if Distance > 50 then
-                    SetEntityCoords(Ped, Config.HospitalLocation.Hospital.x, Config.HospitalLocation.Hospital.y, Config.HospitalLocation.Hospital.z)
-                    SetEntityHeading(Ped, Config.HospitalLocation.Hospital.h)
+                local Distance = Vdist(HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z, Location['x'], Location['y'], Location['z'])
+				if Distance > 30 then
+                    SetEntityCoords(Ped, HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z)
+                    SetEntityHeading(Ped, HospitalLocation.Hospital.h)
 					TriggerEvent('chat:addMessage', {
                         multiline = true,
                         color = {86, 96, 252},
@@ -537,10 +528,10 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime)
             if EarlyDischarge then
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital early')
             else
-                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' seconds.')
+                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' second(s).')
             end
-            SetEntityCoords(Ped, Config.HospitalLocation.Release.x, Config.HospitalLocation.Release.y, Config.HospitalLocation.Release.z)
-            SetEntityHeading(Ped, Config.HospitalLocation.Release.h)
+            SetEntityCoords(Ped, HospitalLocation.Release.x, HospitalLocation.Release.y, HospitalLocation.Release.z)
+            SetEntityHeading(Ped, HospitalLocation.Release.h)
             CurrentlyHospitaled = false
             EarlyDischarge = false
         end)
@@ -557,9 +548,9 @@ end)
 --Station Blips
 Citizen.CreateThread(function()
     if Config.DisplayStationBlips then
-        local function CreateBlip(x, y, z, Name, Colour)
+        local function CreateBlip(x, y, z, Name, Colour, Sprite)
             StationBlip = AddBlipForCoord(x, y, z)
-            SetBlipSprite(StationBlip, 60)
+            SetBlipSprite(StationBlip, Sprite)
             if Config.StationBlipsDispalyed == 1 then
                 SetBlipDisplay(StationBlip, 3)
             elseif Config.StationBlipsDispalyed == 2 then
@@ -569,6 +560,7 @@ Citizen.CreateThread(function()
             end
             SetBlipScale(StationBlip, 1.0)
             SetBlipColour(StationBlip, Colour)
+            SetBlipAsShortRange(StationBlip, true)
         
             BeginTextCommandSetBlipName('STRING')
             AddTextComponentString(Name)
@@ -576,10 +568,13 @@ Citizen.CreateThread(function()
         end
 
         for _, Station in pairs(Config.LEOStations) do
-            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Police Station', 38)
+            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Police Station', 38, 60)
         end
         for _, Station in pairs(Config.FireStations) do
-            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Fire Station', 1)
+            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Fire Station', 1, 60)
+        end
+        for _, Station in pairs(Config.HospitalStations) do
+            CreateBlip(Station.coords.x, Station.coords.y, Station.coords.z, 'Hospital', 2, 61)
         end
     end
 end)
@@ -632,7 +627,7 @@ end)
 
 --Commands
 Citizen.CreateThread(function()
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local Index = 0
         local Emotes = ''
         for _, Emote in pairs(Config.EmotesList) do
@@ -664,11 +659,11 @@ Citizen.CreateThread(function()
     TriggerEvent('chat:removeSuggestion', '/unjail')
     TriggerEvent('chat:removeSuggestion', '/unhospital')
 
-    if Config.LEOAccess == 2 or Config.FireAccess == 2 then
-        if Config.OndutyPSWD == '' then
-            TriggerEvent('chat:addSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}})
-        else
+    if Config.LEOAccess == 3 or Config.FireAccess == 3 then
+        if Config.OndutyPSWDActive then
             TriggerEvent('chat:addSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}, {name = 'Password', help = 'Onduty Password'}})
+        else
+            TriggerEvent('chat:addSuggestion', '/onduty', 'Enable LEO/Fire Menu', {{name = 'Department', help = 'LEO or Fire'}})
         end
     else
         TriggerEvent('chat:removeSuggestion', '/onduty')
@@ -678,14 +673,24 @@ end)
 LEOOnduty = false
 FireOnduty = false
 RegisterCommand('onduty', function(source, args, rawCommands)
-    if Config.LEOAccess == 2 or Config.FireAccess == 2 then
-        if Config.OndutyPSWD ~= '' then
+    if Config.LEOAccess == 3 or Config.FireAccess == 3 then
+        if Config.OndutyPSWDActive then
             if args[2] == Config.OndutyPSWD then
                 local Department = args[1]:lower()
                 if Department == 'leo' then
                     LEOOnduty = not LEOOnduty
+                    if LEOOnduty then
+                        Notify('~g~You are onduty as an LEO')
+                    else
+                        Notify('~o~You are no longer onduty as an LEO')
+                    end
                 elseif Department == 'fire' then
                     FireOnduty = not FireOnduty
+                    if FireOnduty == true then
+                        Notify('~g~You are onduty as an Firefighter')
+                    else
+                        Notify('~o~You are no longer onduty as an Firefighter')
+                    end
                 else
                     Notify('~r~Invalid Department!')
                 end
@@ -696,8 +701,18 @@ RegisterCommand('onduty', function(source, args, rawCommands)
             local Department = args[1]:lower()
             if Department == 'leo' then
                 LEOOnduty = not LEOOnduty
+                if LEOOnduty then
+                    Notify('~g~You are onduty as an LEO')
+                else
+                    Notify('~o~You are no longer onduty as an LEO')
+                end
             elseif Department == 'fire' then
                 FireOnduty = not FireOnduty
+                if FireOnduty == true then
+                    Notify('~g~You are onduty as an Firefighter')
+                else
+                    Notify('~o~You are no longer onduty as an Firefighter')
+                end
             else
                 Notify('~r~Invalid Department!')
             end
@@ -706,62 +721,36 @@ RegisterCommand('onduty', function(source, args, rawCommands)
 end)
 
 RegisterCommand('cuff', function(source, args, rawCommands)
-    if args[1] ~= nil then
-        local ID = tonumber(args[1])
-        TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
-    else
-        local Ped = GetPlayerPed(-1)
-
-        ShortestDistance = 2
-        ClosestId = 0
-
-        for ID = 0, 128 do
-            if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                Ped2 = GetPlayerPed(ID)
-                local x, y, z = table.unpack(GetEntityCoords(Ped))
-                if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                    ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                    ClosestId = GetPlayerServerId(ID)
-                end
+    if LEORestrict() or FireRestrict() then
+        if args[1] ~= nil then
+            local ID = tonumber(args[1])
+            if GetDistance(source) < Config.CommandDistance then
+                TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+            else
+                Notify('~r~That player is too far away')
             end
+        else
+            TriggerServerEvent('SEM_InteractionMenu:CuffNear', GetClosestPlayer())
         end
-
-        if ClosestId == 0 then
-            Notify('~r~No Player Nearby!')
-            return
-        end
-
-        TriggerServerEvent('SEM_InteractionMenu:CuffNear', ClosestId)
+    else
+        Notify('~r~Insufficient Permissions')
     end
 end)
 
 RegisterCommand('drag', function(source, args, rawCommands)
-    if args[1] ~= nil then
-        local ID = tonumber(args[1])
-        TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
-    else
-        local Ped = GetPlayerPed(-1)
-
-        ShortestDistance = 2
-        ClosestId = 0
-
-        for ID = 0, 128 do
-            if NetworkIsPlayerActive(ID) and GetPlayerPed(ID) ~= GetPlayerPed(-1) then
-                Ped2 = GetPlayerPed(ID)
-                local x, y, z = table.unpack(GetEntityCoords(Ped))
-                if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  ShortestDistance) then
-                    ShortestDistance = GetDistanceBetweenCoords(GetEntityCoords(Ped), x, y, z)
-                    ClosestId = GetPlayerServerId(ID)
-                end
+    if LEORestrict() or FireRestrict() then
+        if args[1] ~= nil then
+            local ID = tonumber(args[1])
+            if GetDistance(source) < Config.CommandDistance then
+                TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+            else
+                Notify('~r~That player is too far away')
             end
+        else
+            TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())
         end
-
-        if ClosestId == 0 then
-            Notify('~r~No Player Nearby!')
-            return
-        end
-
-        TriggerServerEvent('SEM_InteractionMenu:DragNear', ClosestId)
+    else
+        Notify('~r~Insufficient Permissions')
     end
 end)
 
@@ -784,17 +773,21 @@ RegisterCommand('unhospital', function(source, args, rawCommands)
 end)
 
 RegisterCommand('loadout', function(source, args, rawCommands)
-    SetEntityHealth(GetPlayerPed(-1), 200)
-    RemoveAllPedWeapons(GetPlayerPed(-1), true)
-    AddArmourToPed(GetPlayerPed(-1), 100)
-    GiveWeapon('weapon_nightstick')
-    GiveWeapon('weapon_flashlight')
-    GiveWeapon('weapon_fireextinguisher')
-    GiveWeapon('weapon_flare')
-    GiveWeapon('weapon_stungun')
-    GiveWeapon('weapon_combatpistol')
-    AddWeaponComponent('weapon_combatpistol', 'component_at_pi_flsh')
-    Notify('~g~Loadout Spawned')
+    if LEORestrict() then
+        SetEntityHealth(GetPlayerPed(-1), 200)
+        RemoveAllPedWeapons(GetPlayerPed(-1), true)
+        AddArmourToPed(GetPlayerPed(-1), 100)
+        GiveWeapon('weapon_nightstick')
+        GiveWeapon('weapon_flashlight')
+        GiveWeapon('weapon_fireextinguisher')
+        GiveWeapon('weapon_flare')
+        GiveWeapon('weapon_stungun')
+        GiveWeapon('weapon_combatpistol')
+        AddWeaponComponent('weapon_combatpistol', 'component_at_pi_flsh')
+        Notify('~g~Loadout Spawned')
+    else
+        Notify('~r~You aren\'t an LEO')
+    end
 end)
 
 RegisterCommand('hu', function(source, args, rawCommands)
@@ -878,7 +871,7 @@ RegisterCommand('trunk', function(source, args, rawCommands)
 end)
 
 RegisterCommand('emotes', function(source, args, rawCommands)
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local Index = 0
         local Emotes = ''
         for _, Emote in pairs(Config.EmotesList) do
@@ -899,7 +892,7 @@ RegisterCommand('emotes', function(source, args, rawCommands)
 end)
 
 RegisterCommand('emote', function(source, args, rawCommands)
-    if Config.DisplayEmotes then
+    if EmoteRestrict() then
         local SelectedEmote = args[1]
 
         for _, Emote in pairs(Config.EmotesList) do

@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.4 (Mar 2020)
+	Current Version: v1.5 (Apr 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -55,6 +55,30 @@ function KeyboardInput(TextEntry, MaxStringLenght)
 	end
 end
 
+function GetClosestPlayer()
+    local Ped = PlayerPedId()
+
+    for _, Player in ipairs(GetActivePlayers()) do
+        if GetPlayerPed(Player) ~= GetPlayerPed(-1) then
+            local Ped2 = GetPlayerPed(Player)
+            local x, y, z = table.unpack(GetEntityCoords(Ped))
+            if (GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z) <  2) then
+                return GetPlayerServerId(Player)
+            end
+        end
+    end
+
+    Notify('~r~No Player Nearby!')
+    return false
+end
+
+function GetDistance(ID)
+    local Ped = GetPlayerPed(-1)
+    local Ped2 = GetPlayerPed(ID)
+    local x, y, z = table.unpack(GetEntityCoords(Ped))
+    return GetDistanceBetweenCoords(GetEntityCoords(Ped2), x, y, z)
+end
+
 
 
 --LEO Functions
@@ -62,6 +86,12 @@ function EnableShield()
     ShieldActive = true
     local Ped = GetPlayerPed(-1)
     local PedPos = GetEntityCoords(Ped, false)
+
+    if IsPedInAnyVehicle(GetPlayerPed(-1), true) then
+        Notify('~r~You cannot be in a vehicle when getting your shield out!')
+        ShieldActive = false
+        return
+    end
     
     RequestAnimDict('combat@gestures@gang@pistol_1h@beckon')
     while not HasAnimDictLoaded('combat@gestures@gang@pistol_1h@beckon') do
@@ -78,49 +108,52 @@ function EnableShield()
     local shield = CreateObject(GetHashKey('prop_ballistic_shield'), PedPos.x, PedPos.y, PedPos.z, 1, 1, 1)
     shieldEntity = shield
     AttachEntityToEntity(shieldEntity, Ped, GetEntityBoneIndexByName(Ped, 'IK_L_Hand'), 0.0, -0.05, -0.10, -30.0, 180.0, 40.0, 0, 0, 1, 0, 0, 1)
-    SetWeaponAnimationOverride(Ped, GetHashKey('Gang1H'))
+    SetWeaponAnimationOverride(Ped, 'Gang1H')
 
-    if HasPedGotWeapon(Ped, GetHashKey('weapon_combatpistol'), 0) or GetSelectedPedWeapon(Ped) == GetHashKey('weapon_combatpistol') then
-        SetCurrentPedWeapon(Ped, GetHashKey('weapon_combatpistol'), 1)
+    if HasPedGotWeapon(Ped, 'weapon_combatpistol', 0) or GetSelectedPedWeapon(Ped) == 'weapon_combatpistol' then
+        SetCurrentPedWeapon(Ped, 'weapon_combatpistol', 1)
         HadPistol = true
     else
-        GiveWeaponToPed(Ped, GetHashKey('weapon_combatpistol'), 300, 0, 1)
-        SetCurrentPedWeapon(Ped, GetHashKey('weapon_combatpistol'), 1)
+        GiveWeaponToPed(Ped, 'weapon_combatpistol', 300, 0, 1)
+        SetCurrentPedWeapon(Ped, 'weapon_combatpistol', 1)
         HadPistol = false
     end
     SetEnableHandcuffs(Ped, true)
 end
 
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(0)
+
+        if ShieldActive == true then
+            DisableControlAction(1, 23, true) --F | Enter Vehicle
+            DisableControlAction(1, 75, true) --F | Exit Vehicle
+        end
+    end
+end)
+
 function DisableShield()
     local Ped = GetPlayerPed(-1)
     DeleteEntity(shieldEntity)
     ClearPedTasksImmediately(Ped)
-    SetWeaponAnimationOverride(Ped, GetHashKey('Default'))
+    SetWeaponAnimationOverride(Ped, 'Default')
+    SetCurrentPedWeapon(Ped, 'weapon_unarmed', 1)
 
     if not HadPistol then
-        RemoveWeaponFromPed(Ped, GetHashKey('weapon_combatpistol'))
+        RemoveWeaponFromPed(Ped, 'weapon_combatpistol')
     end
     SetEnableHandcuffs(Ped, false)
     HadPistol = false
     ShieldActive = false
 end
 
-function GotRadar()
-    local RadarFiles = LoadResourceFile(Config.RadarName, '__resource.lua')
-    if RadarFiles then
-        return true
-    else
-        return false
-    end
-end
-
 
 
 --Civ Functions
-function Ad(Text, Name, Loc, File)
+function Ad(Text, Name, Loc, File, ID)
     SetNotificationTextEntry('STRING')
     AddTextComponentString(Text)
-    SetNotificationMessage(Loc, File, true, 1, Name, '')
+    EndTextCommandThefeedPostMessagetext(Loc, File, true, 1, Name, '~b~Advertisement #' .. ID)
     DrawNotification(false, true)
 end
 
@@ -150,7 +183,7 @@ function SpawnVehicle(Veh, Name)
 
         WaitTime = WaitTime + 1
 
-        if WaitTime == 200 then
+        if WaitTime == 600 then
             CancelEvent()
             Notify('~r~Unable to load vehicle, please contact development!')
             return
@@ -159,9 +192,8 @@ function SpawnVehicle(Veh, Name)
     local x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), false))
     local Vehicle = CreateVehicle(Model, x + 2, y + 2, z + 1, GetEntityHeading(PlayerPedId()), true, false)
     SetPedIntoVehicle(PlayerPedId(), Vehicle, -1)
-    SetEntityAsNoLongerNeeded(Vehicle)
-    SetModelAsNoLongerNeeded(Vehicle)
     SetVehicleDirtLevel(Vehicle, 0)
+    SetModelAsNoLongerNeeded(Model)
 
     if Name then
         Notify('~b~Vehicle Spawned: ~g~' .. Name)
@@ -272,8 +304,10 @@ end
 --Menu Restrictions
 function LEORestrict()
     if Config.LEOAccess == 0 then
-        return true
+        return false
     elseif Config.LEOAccess == 1 then
+        return true
+    elseif Config.LEOAccess == 2 then
         local Ped = GetEntityModel(GetPlayerPed(-1))
 
         for _, LEOPeds in pairs(Config.LEOUniforms) do
@@ -283,9 +317,9 @@ function LEORestrict()
                 return true
             end
         end
-    elseif Config.LEOAccess == 2 then
-        return LEOOnduty
     elseif Config.LEOAccess == 3 then
+        return LEOOnduty
+    elseif Config.LEOAccess == 4 then
         return LEOAce
     else
         return true
@@ -296,8 +330,10 @@ end
 
 function FireRestrict()
     if Config.FireAccess == 0 then
-        return true
+        return false
     elseif Config.FireAccess == 1 then
+        return true
+    elseif Config.FireAccess == 2 then
         local Ped = GetEntityModel(GetPlayerPed(-1))
 
         for _, FirePeds in pairs(Config.FireUniforms) do
@@ -307,10 +343,22 @@ function FireRestrict()
                 return true
             end
         end
-    elseif Config.FireAccess == 2 then
-        return FireOnduty
     elseif Config.FireAccess == 3 then
+        return FireOnduty
+    elseif Config.FireAccess == 4 then
         return FireAce
+    else
+        return true
+    end
+end
+
+
+
+function CivRestrict()
+    if Config.CivAccess == 0 then
+        return false
+    elseif Config.CivAccess == 1 then
+        return true
     else
         return true
     end
@@ -320,13 +368,27 @@ end
 
 function VehicleRestrict()
     if Config.VehicleAccess == 0 then
-        return true
+        return false
     elseif Config.VehicleAccess == 1 then
+        return true
+    elseif Config.VehicleAccess == 2 then
         if IsPedInAnyVehicle(GetPlayerPed(PlayerId()), false) then
             return true
         else
             return false
         end
+    else
+        return true
+    end
+end
+
+
+
+function EmoteRestrict()
+    if Config.EmoteAccess == 0 then
+        return false
+    elseif Config.EmoteAccess == 1 then
+        return true
     else
         return true
     end
