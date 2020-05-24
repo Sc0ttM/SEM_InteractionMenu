@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (menu.lua) - Created by Scott M
-	Current Version: v1.5 (Apr 2020)
+	Current Version: v1.5.1 (May 2020)
 	
 	Support | https://semdevelopment.com/discord
 	
@@ -126,6 +126,11 @@ function Menu()
                     end
                 end
                 Unseat.Activated = function(ParentMenu, SelectedItem)
+                    if IsPedInAnyVehicle(GetPlayerPed(-1), true) then
+                        Notify('~o~You need to be outside of the vehicle')
+                        return
+                    end
+
                     local player = GetClosestPlayer()
                     if player ~= false then
                         TriggerServerEvent('SEM_InteractionMenu:UnseatNear', player)
@@ -407,7 +412,7 @@ function Menu()
                 local LEOTrafficManager = _MenuPool:AddSubMenu(LEOMenu, 'Traffic Manager', '', true)
                 LEOTrafficManager:SetMenuWidthOffset(Config.MenuWidth)
         
-                AreaSize = 30.0
+                AreaSize = 15.0
                 Raduies = {}
                 for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
                     table.insert(Raduies, RaduisInfo.name)
@@ -434,20 +439,24 @@ function Menu()
                         if Zone ~= nil then
                             RemoveSpeedZone(Zone)
                             RemoveBlip(Area)
-                            Notify("Traffic ~g~Resumed")
-                            Zone = nil
                             if Zone2 then
                                 RemoveSpeedZone(Zone2)
                                 RemoveBlip(Area2)
                             end
+                            Zone = nil
+                            Notify("Traffic ~g~Resumed")
                         end
                     end
                     SlowTraffic.Activated = function(ParentMenu, SelectedItem)
                         if Zone ~= nil then 
                             RemoveSpeedZone(Zone)
-                            Notify("Traffic ~g~Resumed")
-                            Zone = nil
                             RemoveBlip(Area)
+                            if Zone2 then
+                                RemoveSpeedZone(Zone2)
+                                RemoveBlip(Area2)
+                            end
+                            Zone = nil
+                            Notify("Traffic ~g~Resumed")
                         else
                             Notify("Traffic ~y~Slowed")
                             Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
@@ -506,6 +515,11 @@ function Menu()
                     end
                 end
                 Unseat.Activated = function(ParentMenu, SelectedItem)
+                    if IsPedInAnyVehicle(GetPlayerPed(-1), true) then
+                        Notify('~o~You need to be outside of the vehicle')
+                        return
+                    end
+
                     local player = GetClosestPlayer()
                     if player ~= false then
                         TriggerServerEvent('SEM_InteractionMenu:UnseatNear', player)
@@ -534,7 +548,7 @@ function Menu()
                                 end
 
                                 Notify('Player Hospitalized for ~b~' .. HospitalTime .. ' seconds')
-                                TriggerServerEvent('SEM_InteractionMenu:Hospitalize', PlayerID, HospitalTime, {x = HospitalInfo.Release.x, y = HospitalInfo.Release.y, z = HospitalInfo.Release.z, h = HospitalInfo.Release.h})
+                                TriggerServerEvent('SEM_InteractionMenu:Hospitalize', PlayerID, HospitalTime, HospitalInfo)
                             end
                         end
                 end

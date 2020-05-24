@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.5 (Apr 2020)
+	Current Version: v1.5.1 (May 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -68,6 +68,10 @@ RegisterNetEvent('Drag')
 AddEventHandler('Drag', function(ID)
 	Drag = not Drag
 	OfficerDrag = ID
+	
+	if not Drag then
+            DetachEntity(PlayerPedId(), true, false)
+	end
 end)
 
 --Drag Attachment
@@ -77,13 +81,10 @@ Citizen.CreateThread(function()
         if Drag then
             local Ped = GetPlayerPed(GetPlayerFromServerId(OfficerDrag))
             local Ped2 = PlayerPedId()
-            AttachEntityToEntity(Ped2, Ped, 4103, 11816, 0.48, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-            StillDragged = true
-        else
-            if(StillDragged) then
-                DetachEntity(PlayerPedId(), true, false)
-                StillDragged = false
-            end
+            AttachEntityToEntity(Ped2, Ped, 4103, 0.35, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+            DisableControlAction(1, 140, true) --R
+			DisableControlAction(1, 141, true) --Q
+			DisableControlAction(1, 142, true) --LMB
         end
     end
 end)
@@ -289,7 +290,7 @@ AddEventHandler('SEM_InteractionMenu:CallBackup', function(Code, StreetName, Coo
             CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 2 Backup Requested', 56, 0.8, 17)
         elseif Code == 3 then
             Notify('An officer is requesting ~r~Code 3 ~w~backup at ~b~' .. StreetName)
-            CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 3 Backup Requested', 56, 0.8, 49)
+            CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 3 Backup Requested', 56, 1.0, 49)
         elseif Code == 99 then
             Notify('An officer is requesting ~r~Code 99 ~w~backup at ~b~' .. StreetName)
             CreateBlip(Coords.x, Coords.y, Coords.z, 'Code 99 Backup Requested', 56, 1.2, 49)
@@ -491,8 +492,8 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
     local Ped = GetPlayerPed(-1)
     if DoesEntityExist(Ped) then
         Citizen.CreateThread(function()
-            SetEntityCoords(Ped, HospitalLocation.x, HospitalLocation.y, HospitalLocation.z)
-            SetEntityHeading(Ped, HospitalLocation.h)
+            SetEntityCoords(Ped, HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z)
+            SetEntityHeading(Ped, HospitalLocation.Hospital.h)
             CurrentlyHospitaled = true
 
             while HospitalTime >= 0 and not EarlyDischarge do
@@ -512,10 +513,10 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
                 Citizen.Wait(1000)
 
                 local Location = GetEntityCoords(Ped, true)
-				local Distance = Vdist(HospitalLocation.x, HospitalLocation.y, HospitalLocation.z, Location['x'], Location['y'], Location['z'])
+                local Distance = Vdist(HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z, Location['x'], Location['y'], Location['z'])
 				if Distance > 30 then
-                    SetEntityCoords(Ped, HospitalLocation.x, HospitalLocation.y, HospitalLocation.z)
-                    SetEntityHeading(Ped, HospitalLocation.h)
+                    SetEntityCoords(Ped, HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z)
+                    SetEntityHeading(Ped, HospitalLocation.Hospital.h)
 					TriggerEvent('chat:addMessage', {
                         multiline = true,
                         color = {86, 96, 252},
@@ -531,8 +532,8 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
             else
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' second(s).')
             end
-            SetEntityCoords(Ped, Config.HospitalLocation.Release.x, Config.HospitalLocation.Release.y, Config.HospitalLocation.Release.z)
-            SetEntityHeading(Ped, Config.HospitalLocation.Release.h)
+            SetEntityCoords(Ped, HospitalLocation.Release.x, HospitalLocation.Release.y, HospitalLocation.Release.z)
+            SetEntityHeading(Ped, HospitalLocation.Release.h)
             CurrentlyHospitaled = false
             EarlyDischarge = false
         end)
@@ -725,10 +726,14 @@ RegisterCommand('cuff', function(source, args, rawCommands)
     if LEORestrict() or FireRestrict() then
         if args[1] ~= nil then
             local ID = tonumber(args[1])
-            if GetDistance(source) < Config.CommandDistance then
-                TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+            if Config.CommandDistanceChecked then
+                if GetDistance(source) < Config.CommandDistance then
+                    TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
+                else
+                    Notify('~r~That player is too far away')
+                end
             else
-                Notify('~r~That player is too far away')
+                TriggerServerEvent('SEM_InteractionMenu:CuffNear', ID)
             end
         else
             TriggerServerEvent('SEM_InteractionMenu:CuffNear', GetClosestPlayer())
@@ -742,10 +747,14 @@ RegisterCommand('drag', function(source, args, rawCommands)
     if LEORestrict() or FireRestrict() then
         if args[1] ~= nil then
             local ID = tonumber(args[1])
-            if GetDistance(source) < Config.CommandDistance then
-                TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+            if Config.CommandDistanceChecked then
+                if GetDistance(source) < Config.CommandDistance then
+                    TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
+                else
+                    Notify('~r~That player is too far away')
+                end
             else
-                Notify('~r~That player is too far away')
+                TriggerServerEvent('SEM_InteractionMenu:DragNear', ID)
             end
         else
             TriggerServerEvent('SEM_InteractionMenu:DragNear', GetClosestPlayer())

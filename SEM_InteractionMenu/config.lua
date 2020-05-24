@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.5 (Apr 2020)
+	Current Version: v1.5.1 (May 2020)
 	
 	Support: https://semdevelopment.com/discord
 
@@ -27,7 +27,7 @@ Config.OpenMenu = 0
 
 --This is the button that will open the menu (If chosen at Config.OpenMenu)
 --Default = 244 [M]  |  To change the button check out https://docs.fivem.net/game-references/controls/
---Controller Support for this resource is DISABLED
+--Controller Support for this resource is DISABLED!
 Config.MenuButton = 244
 
 --This is the command that will open the menu (If chosen at Config.OpenMenu)
@@ -78,6 +78,9 @@ Config.OndutyPSWDActive = false
 
 --This is the onduty password, only people with the password can access the menu if chosen at Config.LEOAccess/Config.FireAccess
 Config.OndutyPSWD = 'OndutyPSWD'
+
+--This determines if the distance between the player using the command and the person being cuffed/dragged is checked
+Config.CommandDistanceChecked = true
 
 --This determines how close you need to be to cuff/drag someone using their ID
 --Default = 100
@@ -148,7 +151,7 @@ Config.UnrackWeapons = true
 Config.LEOJail = true
 
 --This is the max time that someone can be jailed for (Seconds)
-Config.MaxJailTime = 300000
+Config.MaxJailTime = 300
 
 --These is the location of the jail and release point
 Config.JailLocation = {
@@ -306,6 +309,7 @@ Config.DisplayTrafficManager = true
 
 --This determines what radius are avaiable via the traffic manager
 Config.AvaliableRaduies = {
+    {name = 'Tiny', size = 15.0},
     {name = 'Small', size = 30.0},
     {name = 'Medium', size = 40.0},
     {name = 'Large', size = 50.0},

@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.5 (Apr 2020)
+	Current Version: v1.5.1 (May 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -26,6 +26,10 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
+	if ID == source then
+		return
+	end
+	
 	TriggerClientEvent('Drag', ID, source)
 end)
 
