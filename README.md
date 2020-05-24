@@ -12,6 +12,6 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 ### Information:
 Current Version: **dev_v1.5.6**
 
-Current Changes: **• Updated traffic manager position in the menu • Updates Station & Backup Blips to only be dispalyed when close**
+Current Changes: **• Added command distance check conifg option • Fixed parachutes not working**
 
 *This version is not recommend for public use and may be unstable or contain issues!*
