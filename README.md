@@ -10,7 +10,7 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **dev_v1.5.6**
+Current Version: **dev_v1.5.7**
 
 Current Changes: **• Added command distance check conifg option • Fixed parachutes not working**
 
