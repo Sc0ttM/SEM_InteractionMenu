@@ -414,7 +414,7 @@ function Menu()
         
                 AreaSize = 15.0
                 Raduies = {}
-                for _, RaduisInfo in pairs(Config.AvaliableRaduies) do
+                for _, RaduisInfo in pairs(Config.AvailableRaduies) do
                     table.insert(Raduies, RaduisInfo.name)
                 end
     
