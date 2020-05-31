@@ -304,8 +304,8 @@ Config.LEOVehiclesCategories = {
 --This determines if the ai traffic manager will can accessible
 Config.DisplayTrafficManager = true
 
---This determines what radius are avaiable via the traffic manager
-Config.AvaliableRaduies = {
+--This determines what radius are available via the traffic manager
+Config.AvailableRaduies = {
     {name = 'Tiny', size = 15.0},
     {name = 'Small', size = 30.0},
     {name = 'Medium', size = 40.0},
