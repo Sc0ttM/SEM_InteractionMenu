@@ -568,9 +568,6 @@ Config.VehicleOptions = true
 --Disabled = 0 | Everyone = 1 [Default]
 Config.EmoteAccess = 1
 
---This determins if the emotes will be available via the menu or command
-Config.DisplayEmotes = true
-
 --This sets if a help message is displayed when playing an emote
 Config.EmoteHelp = true
 
