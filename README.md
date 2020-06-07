@@ -10,9 +10,9 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.5**
+Current Version: **v1.5.1**
 
-Changes: **• Added Wraith ARS 2x Radar Support • Added AD "Logs" • Distance Checking when using** `/cuff` or `/drag` **• AI Traffic Manager • Updated Version Checker • Updated ACE Permissions • and alot more!**
+Changes: **• Fixed parachutes not being able to be opened • Cuffs not showing when damage taken • Removed the ability for people to shoot while the menu it open • BAC & Inventory showing 'Empty'/'0.0' even when set**
 
 
 ### Links:
