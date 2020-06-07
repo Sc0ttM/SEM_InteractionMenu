@@ -1862,7 +1862,7 @@ function UIMenuGridPanel.New(TopText, LeftText, RightText, BottomText)
         Data = {
             Enabled = true,
         },
-        Background = Sprite.New("commonmenu", "gradient_bgd", 0, 0, 431, 275),
+        Background = Sprite.New("commonmenu", "gradient_bgd", 0, 0, 431, 300),
         Grid = Sprite.New("pause_menu_pages_char_mom_dad", "nose_grid", 0, 0, 200, 200, 0),
         Circle = Sprite.New("mpinventory","in_world_circle", 0, 0, 20, 20, 0),
         Audio = {Slider = "CONTINUOUS_SLIDER", Library = "HUD_FRONTEND_DEFAULT_SOUNDSET", Id = nil},
@@ -1985,7 +1985,7 @@ end
 
 function UIMenuGridPanel:Draw() -- required
     if self.Data.Enabled then
-        self.Background:Size(431 + self.ParentItem:SetParentMenu().WidthOffset, 275)
+        self.Background:Size(431 + self.ParentItem:SetParentMenu().WidthOffset, 300)
 
         self.Background:Draw()
         self.Grid:Draw()
@@ -2931,7 +2931,7 @@ function UIMenu:ProcessControl()
             Citizen.CreateThread(function()
                 self.LeftPressed = true
                 self:GoLeft()
-                Citizen.Wait(275)
+                Citizen.Wait(300)
                 while self.Controls.Left.Enabled and (IsDisabledControlPressed(0, 174) or IsDisabledControlPressed(1, 174) or IsDisabledControlPressed(2, 174)) do
                     self:GoLeft()
                     Citizen.Wait(225)
@@ -2946,7 +2946,7 @@ function UIMenu:ProcessControl()
             Citizen.CreateThread(function()
                 self.RightPressed = true
                 self:GoRight()
-                Citizen.Wait(275)
+                Citizen.Wait(300)
                 while self.Controls.Right.Enabled and (IsDisabledControlPressed(0, 175) or IsDisabledControlPressed(1, 175) or IsDisabledControlPressed(2, 175)) do
                     self:GoRight()
                     Citizen.Wait(225)
