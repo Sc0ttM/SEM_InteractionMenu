@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (fxmanifest.lua) - Created by Scott M
-	Current Version: v1.5.1 (May 2020)
+	Current Version: v1.5.1 (June 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
