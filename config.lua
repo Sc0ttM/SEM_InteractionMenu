@@ -386,7 +386,7 @@ Config.HospitalStations = {
     {name = 'Davis', coords = {x = 294.59, y = -1448.17, z = 29.96, h = 320.92}},
 }
 
---This determines if the LEO Unfiroms section will be visible
+--This determines if the Fire Unfiroms section will be visible
 Config.DisplayFireUniforms = true
 
 --These are the Fire uniforms that are available via the loadouts - these will also be the uniforms which will give access to the Fire menu if that option if chosen at Config.FireAccess
@@ -402,7 +402,7 @@ Config.FireUniforms = {
     {name = 'Paramedic', spawncode = 's_m_m_paramedic_01'},
 }
 
---This determines if the LEO Loadouts section will be visible
+--This determines if the Fire Loadouts section will be visible
 Config.DisplayFireLoadouts = true
 
 --This determines if the Fire vehicles section if available
