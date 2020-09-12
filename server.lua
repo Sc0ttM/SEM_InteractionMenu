@@ -21,9 +21,14 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:CuffNear')
 AddEventHandler('SEM_InteractionMenu:CuffNear', function(ID)
-	if ID == -1 then
-		print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to cuff all players^7')
-		DropPlayer(source, 'Attempting to cuff all players')
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to cuff all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to cuff all players')
+		else
+			print('^1Someone attempted to cuff all players^7')
+		end
+
 		return
 	end
     TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
@@ -32,6 +37,16 @@ end)
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
 	if ID == source then
+		return
+	end
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to drag all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to drag all players')
+		else
+			print('^1Someone attempted to drag all players^7')
+		end
+
 		return
 	end
 	
@@ -55,9 +70,14 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Jail')
 AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
-	if ID == -1 then
-		print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to jail all players^7')
-		DropPlayer(source, 'Attempting to jail all players')
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to jail all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to jail all players')
+		else
+			print('^1Someone attempted to jail all players^7')
+		end
+
 		return
 	end
 	
@@ -107,9 +127,14 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Hospitalize')
 AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time, Location)
-	if ID == -1 then
-		print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to hospitalize all players^7')
-		DropPlayer(source, 'Attempting to hospitalize all players')
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to hospitalize all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to hospitalize all players')
+		else
+			print('^1Someone attempted to hospitalize all players^7')
+		end
+
 		return
 	end
 
