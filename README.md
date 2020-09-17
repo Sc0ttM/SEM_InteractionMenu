@@ -10,8 +10,8 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.6_dev-v1.0**
+Current Version: **v1.6_dev-v1.1**
 
-Current Changes: **• Weapons being able to be used while cuffed • Weapon issues relating to the v1.5 stop shooting while menu is open • Jail & Hospital not working • Updated resource manifest version • Update weapon rack/unrack feature • Added props to Fire menu • Console Logs & Player kicks for people attempting to cuff/jail.hospital all players, etc...**
+Current Changes: **• Updated the cuff client event**
 
 *This version is not recommend for public use and may be unstable or contain issues!*
