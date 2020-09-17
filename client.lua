@@ -15,6 +15,7 @@
 
 
 --Cuffing Event
+local isCuffed = false
 RegisterNetEvent('SEM_InteractionMenu:Cuff')
 AddEventHandler('SEM_InteractionMenu:Cuff', function()
 	local Ped = GetPlayerPed(-1)
