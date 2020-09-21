@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.5.1 (June 2020)
+	Current Version: v1.6 (Sep 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -158,7 +158,7 @@ end
 
 
 --Vehicle Functions
-function SpawnVehicle(Veh, Name)
+function SpawnVehicle(Veh, Name, Livery, Extras)
     local Ped = GetPlayerPed( -1 )
     if (DoesEntityExist(Ped) and not IsEntityDead(Ped)) then 
         local pos = GetEntityCoords(Ped)
@@ -192,6 +192,19 @@ function SpawnVehicle(Veh, Name)
     SetPedIntoVehicle(PlayerPedId(), Vehicle, -1)
     SetVehicleDirtLevel(Vehicle, 0)
     SetModelAsNoLongerNeeded(Model)
+    if Livery then
+        SetVehicleLivery(Vehicle, Livery)
+    end
+    if Extras then
+        for extraId = 0, 30 do
+            if DoesExtraExist(Vehicle, extraId) then
+                SetVehicleExtra(Vehicle, extraId, true)
+            end
+        end
+        for _, extra in pairs(Extras) do
+            SetVehicleExtra(Vehicle, extra, false)
+        end
+    end
 
     if Name then
         Notify('~b~Vehicle Spawned: ~g~' .. Name)
@@ -237,36 +250,77 @@ end
 
 
 
---Object Functions
-SpawnedObjects = {}
-function SpawnObject(Object)
-    local Player = GetPlayerPed(-1)
-    local x, y, z = table.unpack(GetEntityCoords(Player, true))
+--Prop Functions
+function SpawnProp(Object, Name)
+    local Player = PlayerPedId()
+    local Coords = GetEntityCoords(Player)
     local Heading = GetEntityHeading(Player)
-   
-    RequestModel(Object)
 
+    RequestModel(Object)
     while not HasModelLoaded(Object) do
-	    Citizen.Wait(1)
+        Citizen.Wait(0)
     end
 
-    local Obj = CreateObject(GetHashKey(Object), x, y, z - 1.90, true, true, true)
-    local NetID = NetworkGetNetworkIdFromEntity(Obj)
-	PlaceObjectOnGroundProperly(Obj)
-    SetEntityHeading(Obj, Heading)
-    FreezeEntityPosition(Obj, true)
-    
-    table.insert(SpawnedObjects, NetID)
+    local OffsetCoords = GetOffsetFromEntityInWorldCoords(Player, 0.0, 0.75, 0.0)
+    local Prop = CreateObjectNoOffset(Object, OffsetCoords, false, true, false)
+    SetEntityHeading(Prop, Heading)
+    PlaceObjectOnGroundProperly(Prop)
+    SetEntityCollision(Prop, false, true)
+    SetEntityAlpha(Prop, 100)
+    FreezeEntityPosition(Prop, true)
+    SetModelAsNoLongerNeeded(Object)
+
+    Notify('Press ~g~E ~w~to place\nPress ~r~R ~w~to cancel')
+
+    Citizen.CreateThread(function()
+        while true do
+            Citizen.Wait(0)
+
+            local OffsetCoords = GetOffsetFromEntityInWorldCoords(Player, 0.0, 0.75, 0.0)
+            local Heading = GetEntityHeading(Player)
+
+			SetEntityCoordsNoOffset(Prop, OffsetCoords)
+			SetEntityHeading(Prop, Heading)
+            PlaceObjectOnGroundProperly(Prop)
+			DisableControlAction(1, 38, true) --E
+			DisableControlAction(1, 140, true) --R
+            
+            
+            if IsDisabledControlJustPressed(1, 38) then --E
+                local PropCoords = GetEntityCoords(Prop)
+                local PropHeading = GetEntityHeading(Prop)
+                DeleteObject(Prop)
+
+                RequestModel(Object)
+                while not HasModelLoaded(Object) do
+                    Citizen.Wait(0)
+                end
+
+                local Prop = CreateObjectNoOffset(Object, PropCoords, false, true, true)
+                SetEntityHeading(Prop, PropHeading)
+                PlaceObjectOnGroundProperly(Prop)
+                FreezeEntityPosition(Prop, true)
+				SetEntityInvincible(Prop, true)
+                SetModelAsNoLongerNeeded(Object)
+                return
+            end
+
+            if IsDisabledControlJustPressed(1, 140) then --R
+                DeleteObject(Prop)
+                return
+            end
+        end
+    end)
 end
 
-function DeleteOBJ(Object)
+function DeleteProp(Object)
     local Hash = GetHashKey(Object)
     local x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), true))
-    if DoesObjectOfTypeExistAtCoords(x, y, z, 0.9, Hash, true) then
-        local Obj = GetClosestObjectOfType(x, y, z, 0.9, Hash, false, false, false)
-        DeleteObject(Obj)
+    if DoesObjectOfTypeExistAtCoords(x, y, z, 1.5, Hash, true) then
+        local Prop = GetClosestObjectOfType(x, y, z, 1.5, Hash, false, false, false)
+        DeleteObject(Prop)
+        Notify('~r~Prop Removed!')
     end
-    Notify('~r~Object Removed!')
 end
 
 function DeleteEntity(Entity)
@@ -296,6 +350,10 @@ function CancelEmote()
     Notify('~r~Stopping Emote')
     EmotePlaying = false
 end
+
+
+
+
 
 
 

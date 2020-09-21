@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (menu.lua) - Created by Scott M
-	Current Version: v1.5.1 (June 2020)
+	Current Version: v1.6 (Sep 2020)
 	
 	Support | https://semdevelopment.com/discord
 	
@@ -73,12 +73,13 @@ function Menu()
                 local Inventory = NativeUI.CreateItem('Inventory', 'Search Inventory')
                 local BAC = NativeUI.CreateItem('BAC', 'Tests BAC Level')
                 local Jail = NativeUI.CreateItem('Jail', 'Jail Player')
+                local Unjail = NativeUI.CreateItem('Unjail', 'Unjails Player')
                 local Spikes = NativeUI.CreateItem('Deploy Spikes', 'Places Spike Strips in Front of Player')
                 local Shield = NativeUI.CreateItem('Toggle Shield', 'Toggles Bulletproof Shield')
                 local CarbineRifle = NativeUI.CreateItem('Toggle Carbine', 'Toggles Carbine Rifle')
                 local Shotgun = NativeUI.CreateItem('Toggle Shotgun', 'Toggles Shotgun')
                 PropsList = {}
-                for _, Prop in pairs(Config.LEOProps) do
+                for _, Prop in pairs(Config.Props) do
                     table.insert(PropsList, Prop.name)
                 end
                 local Props = NativeUI.CreateListItem('Spawn Props', PropsList, 1, 'Spawn Objects/Props')
@@ -93,11 +94,14 @@ function Menu()
                 LEOActions:AddItem(Inventory)
                 LEOActions:AddItem(BAC)
 				if Config.LEOJail then
-					LEOActions:AddItem(Jail)
+                    LEOActions:AddItem(Jail)
+                    if UnjailAllowed then
+                        LEOActions:AddItem(Unjail)
+                    end
 				end
                 LEOActions:AddItem(Spikes)
                 LEOActions:AddItem(Shield)
-                if Config.UnrackWeapons then
+                if Config.UnrackWeapons == 1 or Config.UnrackWeapons == 2 then
                     LEOActions:AddItem(CarbineRifle)
                     LEOActions:AddItem(Shotgun)
                 end
@@ -146,8 +150,6 @@ function Menu()
                                         TriggerEvent('wk:openRemote')
                                     elseif Config.Radar == 2 then
                                         TriggerEvent('wk:radarRC')
-                                    else
-                                        Notify('~r~Invalid Radar Option, please rectify!')
                                     end
                                 else
                                     Notify('~o~You need to be in the driver seat')
@@ -192,6 +194,15 @@ function Menu()
 
                     Notify('Player Jailed for ~b~' .. JailTime .. ' seconds')
                     TriggerServerEvent('SEM_InteractionMenu:Jail', PlayerID, JailTime)
+                end
+                Unjail.Activated = function(ParentMenu, SelectedItem)
+                    local PlayerID = tonumber(KeyboardInput('Player ID:', 10))
+                    if PlayerID == nil then
+                        Notify('~r~Please enter a player ID')
+                        return
+                    end
+
+                    TriggerServerEvent('SEM_InteractionMenu:Unjail', PlayerID)
                 end
                 Spikes.Activated = function(ParentMenu, SelectedItem)
                     TriggerEvent('SEM_InteractionMenu:Spikes-SpawnSpikes')
@@ -242,16 +253,16 @@ function Menu()
                 end
                 LEOActions.OnListSelect = function(sender, item, index)
                     if item == Props then
-                        for _, Prop in pairs(Config.LEOProps) do
+                        for _, Prop in pairs(Config.Props) do
                             if Prop.name == item:IndexToItem(index) then
-                                TriggerEvent('SEM_InteractionMenu:Object:SpawnObjects', Prop.spawncode, Prop.name)
+                                SpawnProp(Prop.spawncode, Prop.name)
                             end
                         end
                     end
                 end
                 RemoveProps.Activated = function(ParentMenu, SelectedItem)
-                    for _, Prop in pairs(Config.LEOProps) do
-                        DeleteOBJ(Prop.spawncode)
+                    for _, Prop in pairs(Config.Props) do
+                        DeleteProp(Prop.spawncode)
                     end
                 end
 
@@ -402,7 +413,7 @@ function Menu()
                             LEOVehicle:RightLabel(Vehicle.spawncode)
                         end
                         LEOVehicle.Activated = function(ParentMenu, SelectedItem)
-                            SpawnVehicle(Vehicle.spawncode, Vehicle.name)
+                            SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle.extras)
                         end
                     end
                 end
@@ -412,77 +423,73 @@ function Menu()
                 local LEOTrafficManager = _MenuPool:AddSubMenu(LEOMenu, 'Traffic Manager', '', true)
                 LEOTrafficManager:SetMenuWidthOffset(Config.MenuWidth)
         
-                AreaSize = 15.0
-                Raduies = {}
-                for _, RaduisInfo in pairs(Config.AvailableRaduies) do
-                    table.insert(Raduies, RaduisInfo.name)
-                end
+                    TMSize = 10.0
+                    TMSpeed = 0.0
+                    RaduiesNames = {}
+                    Raduies = {
+                        {name = '10m', size = 10.0},
+                        {name = '20m', size = 20.0},
+                        {name = '30m', size = 30.0},
+                        {name = '40m', size = 40.0},
+                        {name = '50m', size = 50.0},
+                        {name = '60m', size = 60.0},
+                        {name = '70m', size = 70.0},
+                        {name = '80m', size = 80.0},
+                        {name = '90m', size = 90.0},
+                        {name = '100m', size = 100.0},
+                    }
+                    SpeedsNames = {}
+                    Speeds = {
+                        {name = '0 mph', speed = 0.0},
+                        {name = '5 mph', speed = 5.0},
+                        {name = '10 mph', speed = 10.0},
+                        {name = '15 mph', speed = 15.0},
+                        {name = '20 mph', speed = 20.0},
+                        {name = '25 mph', speed = 25.0},
+                        {name = '30 mph', speed = 30.0},
+                        {name = '40 mph', speed = 40.0},
+                        {name = '50 mph', speed = 50.0},
+                    }
+
+                    for _, RaduisInfo in pairs(Raduies) do
+                        table.insert(RaduiesNames, RaduisInfo.name)
+                    end
+                    for _, SpeedsInfo in pairs(Speeds) do
+                        table.insert(SpeedsNames, SpeedsInfo.name)
+                    end
     
-                    local Radius = NativeUI.CreateListItem('Radius', Raduies, 1, '')
-                    local ResumeTraffic = NativeUI.CreateItem('~g~Resume ~w~Traffic', '')
-                    local SlowTraffic = NativeUI.CreateItem('~y~Slow ~w~Traffic', '')
-                    local StopTraffic = NativeUI.CreateItem('~r~Stop ~w~Traffic', '')
+                    local Radius = NativeUI.CreateListItem('Radius', RaduiesNames, 1, '')
+                    local Speed = NativeUI.CreateListItem('Speed', SpeedsNames, 1, '')
+                    local TMCreate = NativeUI.CreateItem('Create Speed Zone', '')
+                    local TMDelete = NativeUI.CreateItem('Delete Speed Zone', '')
                     LEOTrafficManager:AddItem(Radius)
-                    LEOTrafficManager:AddItem(ResumeTraffic)
-                    LEOTrafficManager:AddItem(SlowTraffic)
-                    LEOTrafficManager:AddItem(StopTraffic)
+                    LEOTrafficManager:AddItem(Speed)
+                    LEOTrafficManager:AddItem(TMCreate)
+                    LEOTrafficManager:AddItem(TMDelete)
                     Radius.OnListChanged = function(sender, item, index)
-                        if item == Radius then
-                            for _, RaduisInfo in pairs(Config.AvailableRaduies) do
-                                if RaduisInfo.name == item:IndexToItem(index) then
-                                    AreaSize = RaduisInfo.size
-                                end
-                            end
+                        TMSize = Raduies[index].size
+                    end
+                    Speed.OnListChanged = function(sender, item, index)
+                        TMSpeed = Speeds[index].speed
+                    end
+                    TMCreate.Activated = function(ParentMenu, SelectedItem)
+                        if Zone == nil then
+                            Zone = AddSpeedZoneForCoord(GetEntityCoords(PlayerPedId()), TMSize, TMSpeed, false)
+                            Area = AddBlipForRadius(GetEntityCoords(PlayerPedId()), TMSize)
+                            SetBlipAlpha(Area, 100)
+                            Notify('~g~Speed Zone Created')
+                        else
+                            Notify('~y~You already have a Speed Zone created')
                         end
                     end
-                    ResumeTraffic.Activated = function(ParentMenu, SelectedItem)
+                    TMDelete.Activated = function(ParentMenu, SelectedItem)
                         if Zone ~= nil then
                             RemoveSpeedZone(Zone)
                             RemoveBlip(Area)
-                            if Zone2 then
-                                RemoveSpeedZone(Zone2)
-                                RemoveBlip(Area2)
-                            end
                             Zone = nil
-                            Notify("Traffic ~g~Resumed")
-                        end
-                    end
-                    SlowTraffic.Activated = function(ParentMenu, SelectedItem)
-                        if Zone ~= nil then 
-                            RemoveSpeedZone(Zone)
-                            RemoveBlip(Area)
-                            if Zone2 then
-                                RemoveSpeedZone(Zone2)
-                                RemoveBlip(Area2)
-                            end
-                            Zone = nil
-                            Notify("Traffic ~g~Resumed")
+                            Notify('~r~Speed Zone Deleted')
                         else
-                            Notify("Traffic ~y~Slowed")
-                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
-                            SetBlipAlpha(Area, 80)
-                            SetBlipColour(Area, 28)
-                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 5.0, false)
-                        end
-                    end
-                    StopTraffic.Activated = function(ParentMenu, SelectedItem)
-                        if Zone ~= nil then 
-                            RemoveSpeedZone(Zone)
-                            RemoveSpeedZone(Zone2)
-                            RemoveBlip(Area)
-                            RemoveBlip(Area2)
-                            Notify("Traffic ~g~Resumed")
-                            Zone = nil
-                        else
-                            Notify("Traffic ~r~Stopped")
-                            Area = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize)
-                            Area2 = AddBlipForRadius(GetEntityCoords(GetPlayerPed(-1)), AreaSize + AreaSize * 0.5)
-                            Zone = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize, 0.0, false)
-                            Zone2 = AddSpeedZoneForCoord(GetEntityCoords(GetPlayerPed(-1)), AreaSize + AreaSize * 0.5, 0.0, false)
-                            SetBlipAlpha(Area, 90)
-                            SetBlipAlpha(Area2, 80)
-                            SetBlipColour(Area, 1)
-                            SetBlipColour(Area2, 1)
+                            Notify('~y~You don\'t have a Speed Zone')
                         end
                     end
             end
@@ -551,6 +558,41 @@ function Menu()
                                 TriggerServerEvent('SEM_InteractionMenu:Hospitalize', PlayerID, HospitalTime, HospitalInfo)
                             end
                         end
+                    local Unhospitalize = NativeUI.CreateItem('Unhospitalize', 'Unhospitalize Player')
+                    if UnhospitalAllowed then
+                        FireActions:AddItem(Unhospitalize)
+                    end
+                    Unhospitalize.Activated = function(ParentMenu, SelectedItem)
+                        local PlayerID = tonumber(KeyboardInput('Player ID:', 10))
+                        if PlayerID == nil then
+                            Notify('~r~Please enter a player ID')
+                            return
+                        end
+
+                        TriggerServerEvent('SEM_InteractionMenu:Unhospitalize', PlayerID)
+                    end
+                end
+                PropsList = {}
+                for _, Prop in pairs(Config.Props) do
+                    table.insert(PropsList, Prop.name)
+                end
+                local Props = NativeUI.CreateListItem('Spawn Props', PropsList, 1, 'Spawn Objects/Props')
+                local RemoveProps = NativeUI.CreateItem('Remove Props', 'Removes Spawned Props')
+                FireActions:AddItem(Props)
+                FireActions:AddItem(RemoveProps)
+                FireActions.OnListSelect = function(sender, item, index)
+                    if item == Props then
+                        for _, Prop in pairs(Config.Props) do
+                            if Prop.name == item:IndexToItem(index) then
+                                SpawnProp(Prop.spawncode, Prop.name)
+                            end
+                        end
+                    end
+                end
+                RemoveProps.Activated = function(ParentMenu, SelectedItem)
+                    for _, Prop in pairs(Config.Props) do
+                        DeleteProp(Prop.spawncode)
+                    end
                 end
 
             if Config.ShowStations then
@@ -660,7 +702,7 @@ function Menu()
                         FireVehicle:RightLabel(Vehicle.spawncode)
                     end
                     FireVehicle.Activated = function(ParentMenu, SelectedItem)
-                        SpawnVehicle(Vehicle.spawncode, Vehicle.name)
+                        SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle,extras)
                     end
                 end
             end
@@ -1046,7 +1088,7 @@ Citizen.CreateThread(function()
 		_MenuPool:MouseControlsEnabled(false)
 		
 		if IsControlJustPressed(1, Config.MenuButton) and GetLastInputMethod(2) then
-			if not MainMenu:Visible() then
+			if not menuOpen then
 				Menu()
                 MainMenu:Visible(true)
             else

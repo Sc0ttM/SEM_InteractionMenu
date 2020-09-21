@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.5.1 (June 2020)
+	Current Version: v1.6 (Sep 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -15,9 +15,10 @@
 
 
 --Cuffing Event
+local isCuffed = false
 RegisterNetEvent('SEM_InteractionMenu:Cuff')
 AddEventHandler('SEM_InteractionMenu:Cuff', function()
-	Ped = GetPlayerPed(-1)
+	local Ped = GetPlayerPed(-1)
 	if (DoesEntityExist(Ped)) then
 		Citizen.CreateThread(function()
             RequestAnimDict('mp_arresting')
@@ -28,7 +29,7 @@ AddEventHandler('SEM_InteractionMenu:Cuff', function()
             if isCuffed then
                 isCuffed = false
                 SetEnableHandcuffs(Ped, false)
-                ClearPedTasks(Ped)
+                ClearPedTasksImmediately(Ped)
             else
                 isCuffed = true
 				SetEnableHandcuffs(Ped, true)
@@ -43,12 +44,14 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-		if isCuffed and not IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
-			Citizen.Wait(3000)
-			TaskPlayAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
-		end
+        if isCuffed then
+            if not IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
+                Citizen.Wait(3000)
+                TaskPlayAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
+            end
 
-		if isCuffed then
+            SetCurrentPedWeapon(PlayerPedId(), 'weapon_unarmed', true)
+            
             if not Config.VehEnterCuffed then
                 DisableControlAction(1, 23, true) --F | Enter Vehicle
                 DisableControlAction(1, 75, true) --F | Exit Vehicle
@@ -314,7 +317,7 @@ EarlyRelease = false
 OriginalJailTime = 0
 RegisterNetEvent('SEM_InteractionMenu:JailPlayer')
 AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
-    if CurrentlyJailed then
+     if CurrentlyJailed then
         return
     end
     if CurrentlyHospitaled then
@@ -332,8 +335,8 @@ AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
 
             while JailTime >= 0 and not EarlyRelease do
                 SetEntityInvincible(Ped, true)
-                if IsPedInAnyVehicle(Player, false) then
-					ClearPedTasksImmediately(Player)
+                if IsPedInAnyVehicle(Ped, false) then
+					ClearPedTasksImmediately(Ped)
                 end
                 
                 if JailTime % 30 == 0 and JailTime ~= 0 then
@@ -385,18 +388,18 @@ end)
 CarbineEquipped = false
 ShotgunEquipped = false
 Citizen.CreateThread(function()
-    local Ped = GetPlayerPed(-1)
     while true do 
         Citizen.Wait(0)
-        local Ped = GetPlayerPed(-1)
-        local Veh = GetVehiclePedIsIn(Ped)
-        local CurrentWeapon = GetSelectedPedWeapon(Ped)
+
+        if Config.UnrackWeapons == 1 then
+            local Ped = GetPlayerPed(-1)
+            local Veh = GetVehiclePedIsIn(Ped)
+            local CurrentWeapon = GetSelectedPedWeapon(Ped)
         
-        if Config.UnrackWeapons then
             if CarbineEquipped then
                 SetCurrentPedWeapon(Ped, 'weapon_carbinerifle', true)
             else
-                if (tostring(CurrentWeapon) == '-2084633992') then
+                if tostring(CurrentWeapon) == '-2084633992' then
                     Notify('~o~You need to unrack your rifle before you can use it')
                     SetCurrentPedWeapon(Ped, 'weapon_unarmed', true)
                 end
@@ -412,28 +415,6 @@ Citizen.CreateThread(function()
             end
         end
     end
-end)
-
-
-
---Object Spawn Event
-RegisterNetEvent('SEM_InteractionMenu:Object:SpawnObjects')
-AddEventHandler('SEM_InteractionMenu:Object:SpawnObjects', function(ObjectName, Name)
-    if IsPedInAnyVehicle(GetPlayerPed(-1), false) then
-        Notify('~r~You can\'t spawn objects while in a vehicle!')
-        return
-    end
-
-    local SpawnCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()) , 0.0, 0.5, 0.0)
-    
-    local Object = CreateObject(GetHashKey(ObjectName), SpawnCoords.x, SpawnCoords.y, SpawnCoords.z, true, true, true)
-    local NetID = NetworkGetNetworkIdFromEntity(Object)
-    SetNetworkIdExistsOnAllMachines(NetID, true)
-    SetNetworkIdCanMigrate(NetID, false)
-    SetEntityHeading(Object, GetEntityHeading(GetPlayerPed(PlayerId()) ))
-    PlaceObjectOnGroundProperly(Object)
-    FreezeEntityPosition(Object, true)
-    Notify('~b~Object Spawned: ~g~' .. Name)
 end)
 
 
@@ -503,8 +484,8 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
 
             while HospitalTime >= 0 and not EarlyDischarge do
                 SetEntityInvincible(Ped, true)
-                if IsPedInAnyVehicle(Player, false) then
-					ClearPedTasksImmediately(Player)
+                if IsPedInAnyVehicle(Ped, false) then
+					ClearPedTasksImmediately(Ped)
                 end
                 
                 if HospitalTime % 30 == 0 and HospitalTime ~= 0 then
@@ -611,6 +592,28 @@ AddEventHandler('SEM_InteractionMenu:FirePermsResult', function(Allowed)
     end
 end)
 
+UnjailAllowed = false
+TriggerServerEvent('SEM_InteractionMenu:UnjailPerms')
+RegisterNetEvent('SEM_InteractionMenu:UnjailPermsResult')
+AddEventHandler('SEM_InteractionMenu:UnjailPermsResult', function(Allowed)
+    if Allowed then
+        UnjailAllowed = true
+    else
+        UnjailAllowed = false
+    end
+end)
+
+UnhospitalAllowed = false
+TriggerServerEvent('SEM_InteractionMenu:UnhospitalPerms')
+RegisterNetEvent('SEM_InteractionMenu:UnhospitalPermsResult')
+AddEventHandler('SEM_InteractionMenu:UnhospitalPermsResult', function(Allowed)
+    if Allowed then
+        UnhospitalAllowed = true
+    else
+        UnhospitalAllowed = false
+    end
+end)
+
 
 
 --Emote
@@ -662,9 +665,6 @@ Citizen.CreateThread(function()
     TriggerEvent('chat:addSuggestion', '/dropweapon', 'Drops Weapon in Hand')
     TriggerEvent('chat:addSuggestion', '/loadout', 'Equips LEO Weapon Loadout')
     TriggerEvent('chat:addSuggestion', '/coords', 'Shows Current Player Coords and Heading')
-
-    TriggerEvent('chat:removeSuggestion', '/unjail')
-    TriggerEvent('chat:removeSuggestion', '/unhospital')
 
     if Config.LEOAccess == 3 or Config.FireAccess == 3 then
         if Config.OndutyPSWDActive then
@@ -727,6 +727,13 @@ RegisterCommand('onduty', function(source, args, rawCommand)
     end
 end)
 
+function IsOndutyLEO()
+    return LEOOnduty
+end
+function IsOndutyFire()
+    return FireOnduty
+end
+
 RegisterCommand('cuff', function(source, args, rawCommand)
     if LEORestrict() or FireRestrict() then
         if args[1] ~= nil then
@@ -766,24 +773,6 @@ RegisterCommand('drag', function(source, args, rawCommand)
         end
     else
         Notify('~r~Insufficient Permissions')
-    end
-end)
-
-RegisterCommand('unjail', function(source, args, rawCommand)
-    if args[1] ~= nil then
-        if args[2] == Config.UnjailPSWD then
-            TriggerServerEvent('SEM_InteractionMenu:Unjail', args[1])
-            Notify('~g~Releasing player...')
-        end
-    end
-end)
-
-RegisterCommand('unhospital', function(source, args, rawCommand)
-    if args[1] ~= nil then
-        if args[2] == Config.HospitalPSWD then
-            TriggerServerEvent('SEM_InteractionMenu:Unhospitalize', args[1])
-            Notify('~g~Releasing player...')
-        end
     end
 end)
 

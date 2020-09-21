@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.5.1 (June 2020)
+	Current Version: v1.6 (Sep 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -21,12 +21,32 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:CuffNear')
 AddEventHandler('SEM_InteractionMenu:CuffNear', function(ID)
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to cuff all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to cuff all players')
+		else
+			print('^1Someone attempted to cuff all players^7')
+		end
+
+		return
+	end
     TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
 	if ID == source then
+		return
+	end
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to drag all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to drag all players')
+		else
+			print('^1Someone attempted to drag all players^7')
+		end
+
 		return
 	end
 	
@@ -50,6 +70,17 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Jail')
 AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to jail all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to jail all players')
+		else
+			print('^1Someone attempted to jail all players^7')
+		end
+
+		return
+	end
+	
 	TriggerClientEvent('SEM_InteractionMenu:JailPlayer', ID, Time)
 	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' second(s)')
 end)
@@ -96,6 +127,17 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:Hospitalize')
 AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time, Location)
+	if ID == -1 or ID == '-1' then
+		if source ~= '' then
+			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to hospitalize all players^7')
+			DropPlayer(source, '\n[SEM_InteractionMenu] Attempting to hospitalize all players')
+		else
+			print('^1Someone attempted to hospitalize all players^7')
+		end
+
+		return
+	end
+
 	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time, Location)
 	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' second(s)')
 end)
@@ -120,6 +162,24 @@ AddEventHandler('SEM_InteractionMenu:FirePerms', function()
 		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, true)
 	else
 		TriggerClientEvent('SEM_InteractionMenu:FirePermsResult', source, false)
+	end
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:UnjailPerms')
+AddEventHandler('SEM_InteractionMenu:UnjailPerms', function()
+    if IsPlayerAceAllowed(source, 'sem_intmenu.unjail') then
+		TriggerClientEvent('SEM_InteractionMenu:UnjailPermsResult', source, true)
+	else
+		TriggerClientEvent('SEM_InteractionMenu:UnjailPermsResult', source, false)
+	end
+end)
+
+RegisterServerEvent('SEM_InteractionMenu:UnhospitalPerms')
+AddEventHandler('SEM_InteractionMenu:UnhospitalPerms', function()
+    if IsPlayerAceAllowed(source, 'sem_intmenu.unhospital') then
+		TriggerClientEvent('SEM_InteractionMenu:UnhospitalPermsResult', source, true)
+	else
+		TriggerClientEvent('SEM_InteractionMenu:UnhospitalPermsResult', source, false)
 	end
 end)
 
@@ -160,5 +220,7 @@ Citizen.CreateThread(function()
 		SetTimeout(60000000, VersionCheckHTTPRequest)
 	end
 
-	VersionCheckHTTPRequest()
+	if CurrentVersion then
+		VersionCheckHTTPRequest()
+	end
 end)

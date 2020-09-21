@@ -2448,7 +2448,7 @@ function UIMenu.New(Title, Subtitle, X, Y, TxtDictionary, TxtName)
             MultilineFormats = true,
             ScaleWithSafezone = true,
             ResetCursorOnOpen = true,
-            MouseControlsEnabled = true,
+            MouseControlsEnabled = false,
             MouseEdgeEnabled = true,
             ControlDisablingEnabled = true,
             Audio = {
@@ -2848,15 +2848,6 @@ function UIMenu:Visible(bool)
         return self._Visible
     end
 end
-menuOpen = false
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        if menuOpen then
-            SetCurrentPedWeapon(GetPlayerPed(-1), 'weapon_unarmed', true)
-        end
-    end
-end)
 
 function UIMenu:ProcessControl()
     if not self._Visible then
@@ -3303,8 +3294,8 @@ function UIMenu:ProcessMouse()
     if not self._Visible or self.JustOpened or #self.Items == 0 or tobool(Controller()) or not self.Settings.MouseControlsEnabled then
         EnableControlAction(0, 2, true)
         EnableControlAction(0, 1, true)
-        EnableControlAction(0, 25, true)
-        EnableControlAction(0, 24, true)
+        --[[EnableControlAction(0, 25, true)
+        EnableControlAction(0, 24, true)]]
         if self.Dirty then
             for _, Item in pairs(self.Items) do
                 if Item:Hovered() then

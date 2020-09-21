@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.5.1 (June 2020)
+	Current Version: v1.6 (Sep 2020)
 	
 	Support: https://semdevelopment.com/discord
 
@@ -100,6 +100,25 @@ Config.DisplayStationBlips = true
 --On Mini Map & Main Map = 0 [Default]  |  Only on Main Map = 1  |  Only on Mini Map = 2
 Config.StationBlipsDispalyed = 0
 
+--These are the props avaliable via the LEO & Fire menus
+Config.Props = {
+    --[[
+        EXAMPLE: 
+		{name = 'a', spawncode = 'b'},
+        ────────────────────────────────────────────────────────────────
+        'a' is the title that shows in the menu
+        'b' is the spawn code for prop that will be spawned
+    ]]
+    {name = 'Police Barrier', spawncode = 'prop_barrier_work05'},
+    {name = 'Barrier', spawncode = 'prop_barrier_work06a'},
+    {name = 'Traffic Cone', spawncode = 'prop_roadcone01a'},
+    {name = 'Cone', spawncode = 'prop_roadcone02b'},
+    {name = 'Work Barrier', spawncode = 'prop_mp_barrier_02b'},
+    {name = 'Work Barrier 2', spawncode = 'prop_barrier_work01a'},
+    {name = 'Lighting', spawncode = 'prop_worklight_03b'},
+    {name = 'Tent', spawncode = 'prop_gazebo_02'},
+}
+
 
 
 
@@ -142,10 +161,13 @@ Config.LEOAccess = 1
 Config.Radar = 0
 
 --This determines when someone if cuffed if they can enter or exit a vehicle
-Config.VehEnterCuffed = true
+Config.VehEnterCuffed = false
 
 --This determines if you need to unrack the carbine rifle of pumpshotun from a vehicle to obtain it
-Config.UnrackWeapons = true
+--Disabled = 0 | Constant = 1  |  Free-hand = 2 [Default]
+--Constant = Once unracked it is unable to be removed from hand until racked again in a vehicle
+--Free-hand = Once unracked it is able to be removed from hand
+Config.UnrackWeapons = 2
 
 --This sets if the Jail functions will be visible in the menu
 Config.LEOJail = true
@@ -159,15 +181,8 @@ Config.JailLocation = {
     Release = {x = 1851.24, y = 2585.77, z = 45.67, h = 271.44},
 }
 
---This sets the unjail password
---NOTE: This command can be accessed by everyone, however, it is NOT visible in chat use the command in the format '/unjail [ID] [Password]'
-Config.UnjailPSWD = 'pswd'
-
 --This determines if the backup section of the LEO menu will be visible
 Config.DisplayBackup = true
-
---This determines if the backup requests display a Blip on the map
-Config.DisplayBackupBlips = true
 
 --This sets the time between the blip being created and removed (Minutes)
 --Default = 5
@@ -175,23 +190,6 @@ Config.BackupBlipTimeout = 5
 
 --This determines if the LEO props menu will be available
 Config.DisplayProps = true
-
---These are the props avaliable via the LEO menu
-Config.LEOProps = {
-    --[[
-        EXAMPLE: 
-		{name = 'a', spawncode = 'b'},
-        ────────────────────────────────────────────────────────────────
-        'a' is the title that shows in the menu
-        'b' is the spawn code for prop that will be spawned
-    ]]
-    {name = 'Police Barrier', spawncode = 'prop_barrier_work05'},
-    {name = 'Barrier', spawncode = 'prop_barrier_work06a'},
-    {name = 'Traffic Cone', spawncode = 'prop_roadcone01a'},
-    {name = 'Work Barrier', spawncode = 'prop_mp_barrier_02b'},
-    {name = 'Work Barrier 2', spawncode = 'prop_barrier_work01a'},
-    {name = 'Lighting', spawncode = 'prop_worklight_03b'},
-}
 
 --These are the station available via the station menu
 Config.LEOStations = {
@@ -278,12 +276,14 @@ Config.LEOVehiclesCategories = {
 	--[[
         EXAMPLE: 
 		['a'] = {
-		    {name = 'b', spawncode = 'c'},
+		    {name = 'b', spawncode = 'c', livery = d, extras = {e, e}},
 		}
         ────────────────────────────────────────────────────────────────
         'a' is the title of the Category
         'b' is the title of the vehicle that shows in the menu
         'c' is the spawn code for vehicle that will be spawned
+         d  is the number of the livery which you want it to spawn with
+         e  is the number(s) of extra(s) which you want it to spawn with
 
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]
@@ -306,16 +306,6 @@ Config.LEOVehiclesCategories = {
 
 --This determines if the ai traffic manager will can accessible
 Config.DisplayTrafficManager = true
-
---This determines what radius are available via the traffic manager
-Config.AvailableRaduies = {
-    {name = 'Tiny', size = 15.0},
-    {name = 'Small', size = 30.0},
-    {name = 'Medium', size = 40.0},
-    {name = 'Large', size = 50.0},
-    {name = 'Ex Large', size = 60.0},
-    {name = 'Mega', size = 80.0}
-}
 
 
 
@@ -363,10 +353,6 @@ Config.HospitalLocation = {
     }
 }
 
---This sets the unhospital password
---NOTE: This command can be accessed by everyone, however, it is NOT visible in chat use the command in the format '/unhospital [ID] [Password]'
-Config.HospitalPSWD = 'pswd'
-
 --These are the station available via the station menu
 Config.FireStations = {
     {name = 'Sandy Shores', coords = {x = 1693.57, y = 3582.68, z = 35.62 , h = 227.29}},
@@ -386,7 +372,7 @@ Config.HospitalStations = {
     {name = 'Davis', coords = {x = 294.59, y = -1448.17, z = 29.96, h = 320.92}},
 }
 
---This determines if the Fire Unfiroms section will be visible
+--This determines if the LEO Unfiroms section will be visible
 Config.DisplayFireUniforms = true
 
 --These are the Fire uniforms that are available via the loadouts - these will also be the uniforms which will give access to the Fire menu if that option if chosen at Config.FireAccess
@@ -402,7 +388,7 @@ Config.FireUniforms = {
     {name = 'Paramedic', spawncode = 's_m_m_paramedic_01'},
 }
 
---This determines if the Fire Loadouts section will be visible
+--This determines if the LEO Loadouts section will be visible
 Config.DisplayFireLoadouts = true
 
 --This determines if the Fire vehicles section if available
@@ -415,10 +401,15 @@ Config.ShowFireSpawnCode = true
 Config.FireVehicles = {
 	--[[
         EXAMPLE: 
-		{name = 'a', spawncode = 'b'},
+		['a'] = {
+		    {name = 'b', spawncode = 'c', livery = d, extras = {e, e}},
+		}
         ────────────────────────────────────────────────────────────────
-        'a' is the title of the vehicle that shows in the menu
-        'b' is the spawn code for vehicle that will be spawned
+        'a' is the title of the Category
+        'b' is the title of the vehicle that shows in the menu
+        'c' is the spawn code for vehicle that will be spawned
+         d  is the number of the livery which you want it to spawn with
+         e  is the number(s) of extra(s) which you want it to spawn with
 
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]
@@ -481,6 +472,7 @@ Config.CivVehicles = {
 Config.ShowCivAdverts = true
 
 --These are the adverts that are avaiable via the ads menu
+--NOTE: You can add additional adverts from https://wiki.gtanet.work/index.php?title=Notification_Pictures
 Config.CivAdverts = {
     --[[
         EXAMPLE: 
@@ -499,14 +491,17 @@ Config.CivAdverts = {
 	
 	{name = '24/7', loc = 'CHAR_FLOYD', file = '247'},
     {name = 'Ammunation', loc = 'CHAR_AMMUNATION', file = 'CHAR_AMMUNATION'},
-    {name = 'Bugstars', loc = 'CHAR_FLOYD', file = 'BUG'},
+    {name = 'Bugstars', loc = 'CHAR_BUGSTARS', file = 'CHAR_BUGSTARS'},
     {name = 'Cluckin\' Bell', loc = 'CHAR_FLOYD', file = 'BELL'},
     {name = 'Downtown Cab Co.', loc = 'CHAR_TAXI', file = 'CHAR_TAXI'},
     {name = 'Dynasty 8', loc = 'CHAR_FLOYD', file = 'D8'},
     {name = 'Fleeca Bank', loc = 'CHAR_BANK_FLEECA', file = 'CHAR_BANK_FLEECA'},
     {name = 'Gruppe6', loc = 'CHAR_FLOYD', file = 'GRUPPE6'},
+    {name = 'Merry Weather', loc = 'CHAR_MP_MERRYWEATHER', file = 'CHAR_MP_MERRYWEATHER'},
     {name = 'Limited Gasoline', loc = 'CHAR_FLOYD', file = 'LTD'},
     {name = 'Liquor Ace', loc = 'CHAR_FLOYD', file = 'ACE'},
+    {name = 'Smoke on the Water', loc = 'CHAR_FLOYD', file = 'SOTW'},
+    {name = 'Pegasus', loc = 'CHAR_PEGASUS_DELIVERY', file = 'CHAR_PEGASUS_DELIVERY'},
     {name = 'Los Santos Customs', loc = 'CHAR_LS_CUSTOMS', file = 'CHAR_LS_CUSTOMS'},
     {name = 'Los Santos Traffic Info', loc = 'CHAR_LS_TOURIST_BOARD', file = 'CHAR_LS_TOURIST_BOARD'},
     {name = 'Los Santos Water and Power', loc = 'CHAR_FLOYD', file = 'LSWP'},
@@ -514,6 +509,9 @@ Config.CivAdverts = {
     {name = 'PostOP', loc = 'CHAR_FLOYD', file = 'OP'},
     {name = 'Vanilla Unicorn', loc = 'CHAR_MP_STRIPCLUB_PR', file = 'CHAR_MP_STRIPCLUB_PR'},
     {name = 'Weazel News', loc = 'CHAR_FLOYD', file = 'NEWS'},
+    {name = 'Facebook', loc = 'CHAR_FACEBOOK', file = 'CHAR_FACEBOOK'},
+    {name = 'Life Invader', loc = 'CHAR_LIFEINVADER', file = 'CHAR_LIFEINVADER'},
+    {name = 'YouTube', loc = 'CHAR_YOUTUBE', file = 'CHAR_YOUTUBE'},
 }
 
 
