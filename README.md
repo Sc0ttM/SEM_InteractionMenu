@@ -10,9 +10,9 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.5.1**
+Current Version: **v1.6**
 
-Changes: **• Fixed parachutes not being able to be opened • Cuffs not showing when damage taken • Removed the ability for people to shoot while the menu it open • BAC & Inventory showing 'Empty'/'0.0' even when set**
+Changes: **• Fixed mutliple issues relating to weapons not showing etc. • Updated the unrack/rack feature to allow for the weapon to be put awayn • Removed /unjail & /unhospital and replaced with menu buttons • Removed the ability for players to trigger server events with the id of -1 & a lot more!**
 
 
 ### Links:
