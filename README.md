@@ -10,9 +10,9 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.6**
+Current Version: **v1.6.1**
 
-Changes: **• Fixed mutliple issues relating to weapons not showing etc. • Updated the unrack/rack feature to allow for the weapon to be put awayn • Removed /unjail & /unhospital and replaced with menu buttons • Removed the ability for players to trigger server events with the id of -1 & a lot more!**
+Changes: **• Fixed an issue with the Fire Vehicle extras not working**
 
 
 ### Links:
