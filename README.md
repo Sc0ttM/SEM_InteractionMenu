@@ -21,6 +21,6 @@ Support/Discord: [Click Here](https://semdevelopment.com/discord)
 
 Information: [Click Here](https://semdevelopment.com/releases/interactionmenu)
 
-Instruction/Docs: [Click here](https://docs.semdevelopment.com/fivem/interactionmenu)
+Instruction/Docs: [Click here](https://semdevelopment.com/releases/interactionmenu/docs)
 
-*For full changes checkout [here](https://semdevelopment.com/releases/interactionmenu/changelog)*
+*For full changes checkout [here](https://semdevelopment.com/releases/interactionmenu/docs/changelog)*
