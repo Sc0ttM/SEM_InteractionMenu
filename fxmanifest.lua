@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (fxmanifest.lua) - Created by Scott M
-	Current Version: v1.6.1 (Sep 2020)
+	Current Version: v1.6.2 (Oct 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -21,7 +21,7 @@ games {'gta5'}
 title 'SEM_InteractionMenu'
 description 'Multi Purpose Interaction Menu'
 author 'Scott M [SEM Development]'
-version 'v1.6.1' --This is required for the version checker, DO NOT change or remove
+version 'v1.6.2' --This is required for the version checker, DO NOT change or remove
 
 client_scripts {
     'dependencies/NativeUI.lua',

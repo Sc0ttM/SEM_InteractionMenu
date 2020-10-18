@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.6.1 (Sep 2020)
+	Current Version: v1.6.2 (Oct 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -296,7 +296,7 @@ function SpawnProp(Object, Name)
                     Citizen.Wait(0)
                 end
 
-                local Prop = CreateObjectNoOffset(Object, PropCoords, false, true, true)
+                local Prop = CreateObjectNoOffset(Object, PropCoords, true, true, true)
                 SetEntityHeading(Prop, PropHeading)
                 PlaceObjectOnGroundProperly(Prop)
                 FreezeEntityPosition(Prop, true)
