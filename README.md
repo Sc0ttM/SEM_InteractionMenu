@@ -10,9 +10,9 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.6.1**
+Current Version: **v1.6.2**
 
-Changes: **• Fixed an issue with the Fire Vehicle extras not working**
+Changes: **• Fixed an issue with props not being networked**
 
 
 ### Links:
