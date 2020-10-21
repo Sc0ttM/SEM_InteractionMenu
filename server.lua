@@ -21,6 +21,10 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:CuffNear')
 AddEventHandler('SEM_InteractionMenu:CuffNear', function(ID)
+	if ID == source or ID == false then
+		return
+	end	
+		
 	if ID == -1 or ID == '-1' then
 		if source ~= '' then
 			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to cuff all players^7')
@@ -36,7 +40,7 @@ end)
 
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
-	if ID == source then
+	if ID == source or ID == false then
 		return
 	end
 	if ID == -1 or ID == '-1' then
