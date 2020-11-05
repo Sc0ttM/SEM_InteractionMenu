@@ -10,8 +10,8 @@ SEM_InteractionMenu was created using NativeUI [LUA]
 
 
 ### Information:
-Current Version: **v1.6_dev-v1.1**
+Current Version: **v1.7_dev-v1.0**
 
-Current Changes: **• Updated the cuff client event**
+Current Changes: **• Performance Improvements • Updated Spike Strip Deployment and Retraction • Changed Menu item descriptions • Updated Some item positions • Updated Jail & Hospital messages from "seconds" to "months" • Updated Version Checker • Added Submenu Arrows • Added /radar command • Removed Some unused code & variables**
 
 *This version is not recommend for public use and may be unstable or contain issues!*
