@@ -2,7 +2,7 @@
 ─────────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (functions.lua) - Created by Scott M
-	Current Version: v1.6 (Sep 2020)
+	Current Version: v1.7 (Nov 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -80,6 +80,29 @@ function GetDistance(ID)
 end
 
 --LEO Functions
+function ToggleRadar()
+    if Config.Radar ~= 0 then
+        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
+                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
+                    _MenuPool:CloseAllMenus()
+                    if Config.Radar == 1 then
+                        TriggerEvent('wk:openRemote')
+                    elseif Config.Radar == 2 then
+                        TriggerEvent('wk:radarRC')
+                    end
+                else
+                    Notify('~o~You need to be in the driver seat')
+                end
+            else
+                Notify('~o~You need to be in a police vehicle')
+            end
+        else
+            Notify('~o~You need to be in a vehicle')
+        end
+    end
+end
+
 function EnableShield()
     ShieldActive = true
     local Ped = GetPlayerPed(-1)
@@ -121,7 +144,7 @@ end
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(0)
+        Citizen.Wait(1)
 
         if ShieldActive == true then
             DisableControlAction(1, 23, true) --F | Enter Vehicle
@@ -191,6 +214,8 @@ function SpawnVehicle(Veh, Name, Livery, Extras)
     local Vehicle = CreateVehicle(Model, x + 2, y + 2, z + 1, GetEntityHeading(PlayerPedId()), true, false)
     SetPedIntoVehicle(PlayerPedId(), Vehicle, -1)
     SetVehicleDirtLevel(Vehicle, 0)
+    SetVehicleModKit(Vehicle, 0)
+    SetVehicleMod(Vehicle, 23, -1, false)
     SetModelAsNoLongerNeeded(Model)
     if Livery then
         SetVehicleLivery(Vehicle, Livery)
@@ -223,10 +248,12 @@ end
 function LoadPed(Hash)
     Citizen.CreateThread(function()
         local Model = GetHashKey(Hash)
-            RequestModel(Model)
+        RequestModel(Model)
+
         while not HasModelLoaded(Model) do
             Wait(0)
         end
+
         if HasModelLoaded(Model) then
             SetPlayerModel(PlayerId(), Model)
         else
@@ -296,7 +323,7 @@ function SpawnProp(Object, Name)
                     Citizen.Wait(0)
                 end
 
-                local Prop = CreateObjectNoOffset(Object, PropCoords, false, true, true)
+                local Prop = CreateObjectNoOffset(Object, PropCoords, true, true, true)
                 SetEntityHeading(Prop, PropHeading)
                 PlaceObjectOnGroundProperly(Prop)
                 FreezeEntityPosition(Prop, true)

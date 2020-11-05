@@ -2922,10 +2922,12 @@ function UIMenu:ProcessControl()
             Citizen.CreateThread(function()
                 self.LeftPressed = true
                 self:GoLeft()
-                Citizen.Wait(300)
+                Citizen.Wait(225)
                 while self.Controls.Left.Enabled and (IsDisabledControlPressed(0, 174) or IsDisabledControlPressed(1, 174) or IsDisabledControlPressed(2, 174)) do
-                    self:GoLeft()
-                    Citizen.Wait(225)
+                    Citizen.Wait(300)
+                    if self.Controls.Left.Enabled and (IsDisabledControlPressed(0, 174) or IsDisabledControlPressed(1, 174) or IsDisabledControlPressed(2, 174)) then
+                        self:GoLeft()
+                    end
                 end
                 self.LeftPressed = false
             end)
@@ -2937,10 +2939,12 @@ function UIMenu:ProcessControl()
             Citizen.CreateThread(function()
                 self.RightPressed = true
                 self:GoRight()
-                Citizen.Wait(300)
+                Citizen.Wait(225)
                 while self.Controls.Right.Enabled and (IsDisabledControlPressed(0, 175) or IsDisabledControlPressed(1, 175) or IsDisabledControlPressed(2, 175)) do
-                    self:GoRight()
-                    Citizen.Wait(225)
+                    Citizen.Wait(300)
+                    if self.Controls.Right.Enabled and (IsDisabledControlPressed(0, 175) or IsDisabledControlPressed(1, 175) or IsDisabledControlPressed(2, 175)) then
+                        self:GoRight()
+                    end
                 end
                 self.RightPressed = false
             end)
@@ -3615,6 +3619,7 @@ function MenuPool:AddSubMenu(Menu, Text, Description, KeepPosition, KeepBanner)
                 SubMenu.Banner = Menu.Banner
             end
         end
+        Item:RightLabel('→→→')
         self:Add(SubMenu)
         Menu:BindMenuToItem(SubMenu, Item)
         return SubMenu
