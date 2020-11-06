@@ -165,17 +165,16 @@ end)
 --Spike Strip Tire Popping
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(2)
+        Citizen.Wait(25)
 
-        if IsPedInAnyVehicle(GetPlayerPed(PlayerId()) , false) then
-            local Vehicle = GetVehiclePedIsIn(GetPlayerPed(PlayerId()) , false)
-            if GetPedInVehicleSeat(Vehicle, -1) == GetPlayerPed(PlayerId())  then
+        if IsPedInAnyVehicle(PlayerPedId() , false) then
+            local Vehicle = GetVehiclePedIsIn(PlayerPedId() , false)
+
+            if GetPedInVehicleSeat(Vehicle, -1) == PlayerPedId()  then
                 local VehiclePos = GetEntityCoords(Vehicle, false)
-                local Spikes = GetClosestObjectOfType(VehiclePos.x, VehiclePos.y, VehiclePos.z, 80.0, GetHashKey('P_ld_stinger_s'), 1, 1, 1)
-                local SpikePos = GetEntityCoords(Spikes, false)
-                local Distance = Vdist(VehiclePos.x, VehiclePos.y, VehiclePos.z, SpikePos.x, SpikePos.y, SpikePos.z)
+                local Spike = GetClosestObjectOfType(VehiclePos.x, VehiclePos.y, VehiclePos.z, 2.0, GetHashKey('P_ld_stinger_s'), 1, 1, 1)
 
-                if Spikes ~= 0 then
+                if Spike ~= 0 then
                     local Tires = {
                         {bone = 'wheel_lf', index = 0},
                         {bone = 'wheel_rf', index = 1},
@@ -186,12 +185,11 @@ Citizen.CreateThread(function()
                     }
         
                     for a = 1, #Tires do
-                        local Vehicle = GetVehiclePedIsIn(GetPlayerPed(PlayerId()) , false)
                         local TirePos = GetWorldPositionOfEntityBone(Vehicle, GetEntityBoneIndexByName(Vehicle, Tires[a].bone))
-                        local Spike = GetClosestObjectOfType(TirePos.x, TirePos.y, TirePos.z, 15.0, GetHashKey('P_ld_stinger_s'), 1, 1, 1)
+                        local Spike = GetClosestObjectOfType(TirePos.x, TirePos.y, TirePos.z, 2.0, GetHashKey('P_ld_stinger_s'), 1, 1, 1)
                         local SpikePos = GetEntityCoords(Spike, false)
                         local Distance = Vdist(TirePos.x, TirePos.y, TirePos.z, SpikePos.x, SpikePos.y, SpikePos.z)
-        
+            
                         if Distance < 1.8 then
                             if not IsVehicleTyreBurst(Vehicle, Tires[a].index, true) or IsVehicleTyreBurst(Vehicle, Tires[a].index, false) then
                                 SetVehicleTyreBurst(Vehicle, Tires[a].index, false, 1000.0)
