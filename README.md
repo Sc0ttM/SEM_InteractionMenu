@@ -1,3 +1,5 @@
+[![Discord](https://semdevelopment.com/img/discord.png)](https://semdevelopment.com/discord)
+
 # SEM_InteractionMenu
 *Multi Purpose FiveM Interaction Menu*
 
