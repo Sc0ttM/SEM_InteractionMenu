@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (server.lua) - Created by Scott M
-	Current Version: v1.6.2 (Oct 2020)
+	Current Version: v1.7 (Nov 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -31,14 +31,14 @@ AddEventHandler('SEM_InteractionMenu:CuffNear', function(ID)
 
 		return
 	end
-    TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
+
+	if ID ~= false then
+		TriggerClientEvent('SEM_InteractionMenu:Cuff', ID)
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:DragNear')
 AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
-	if ID == source then
-		return
-	end
 	if ID == -1 or ID == '-1' then
 		if source ~= '' then
 			print('^1[#' .. source .. '] ' .. GetPlayerName(source) .. '  -  attempted to drag all players^7')
@@ -50,7 +50,9 @@ AddEventHandler('SEM_InteractionMenu:DragNear', function(ID)
 		return
 	end
 	
-	TriggerClientEvent('SEM_InteractionMenu:Drag', ID, source)
+	if ID ~= false and ID ~= source then
+		TriggerClientEvent('SEM_InteractionMenu:Drag', ID, source)
+	end
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:SeatNear')
@@ -61,11 +63,6 @@ end)
 RegisterServerEvent('SEM_InteractionMenu:UnseatNear')
 AddEventHandler('SEM_InteractionMenu:UnseatNear', function(ID, Vehicle)
     TriggerClientEvent('SEM_InteractionMenu:Unseat', ID, Vehicle)
-end)
-
-RegisterServerEvent('SEM_InteractionMenu:Spikes-TriggerDeleteSpikes')
-AddEventHandler('SEM_InteractionMenu:Spikes-TriggerDeleteSpikes', function(NetID)
-    TriggerClientEvent('SEM_InteractionMenu:Spikes-DeleteSpikes', -1, NetID)
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Jail')
@@ -82,7 +79,7 @@ AddEventHandler('SEM_InteractionMenu:Jail', function(ID, Time)
 	end
 	
 	TriggerClientEvent('SEM_InteractionMenu:JailPlayer', ID, Time)
-	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' second(s)')
+	TriggerClientEvent('chatMessage', -1, 'Judge', {86, 96, 252}, GetPlayerName(ID) .. ' has been Jailed for ' .. Time .. ' months(s)')
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unjail')
@@ -139,7 +136,7 @@ AddEventHandler('SEM_InteractionMenu:Hospitalize', function(ID, Time, Location)
 	end
 
 	TriggerClientEvent('SEM_InteractionMenu:HospitalizePlayer', ID, Time, Location)
-	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' second(s)')
+	TriggerClientEvent('chatMessage', -1, 'Doctor', {86, 96, 252}, GetPlayerName(ID) .. ' has been Hospitalized for ' .. Time .. ' months(s)')
 end)
 
 RegisterServerEvent('SEM_InteractionMenu:Unhospitalize')
@@ -184,12 +181,20 @@ AddEventHandler('SEM_InteractionMenu:UnhospitalPerms', function()
 end)
 
 
+local resourceName = 
+[[^3
+     _____   ______   _____      _____
+    / ____| |   ___| |     \    /     |
+   | (___   |  |___  |  |\  \  /  /|  |
+    \___ \  |   ___| |  | \  \/  / |  |
+    ____) | |  |___  |  |  \    /  |  |
+   \_____/  |______| |__|   \__/   |__|^7
+       	   InteractionMenu
+	  Created By Scott M
+]]
 
 Citizen.CreateThread(function()
-	local CurrentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
-	if not CurrentVersion then
-		print('^1SEM_InteractionMenu Version Check Failed!^7')
-	end
+	local currentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version', 0)
 
 	function VersionCheckHTTPRequest()
 		PerformHttpRequest('https://semdevelopment.com/releases/interactionmenu/info/version.json', VersionCheck, 'GET')
@@ -198,21 +203,32 @@ Citizen.CreateThread(function()
 	function VersionCheck(err, response, headers)
 		Citizen.Wait(3000)
 		if err == 200 then
-			local Data = json.decode(response)
+			local data = json.decode(response)
 			
-			if CurrentVersion ~= Data.NewestVersion then
-				print('\n--------------------------------------------------------------------------')
-				print('\nSEM_InteractionMenu is outdated!')
-				print('Current Version: ^2' .. Data.NewestVersion .. '^7')
-				print('Your Version: ^1' .. CurrentVersion .. '^7')
-				print('Please download the lastest version from ^5' .. Data.DownloadLocation .. '^7')
-				if Data.Changes ~= '' then
-					print('\n^5Changes: ^7' .. Data.Changes)
-				end
-				print('\n--------------------------------------------------------------------------\n^7')
-			else
-				print('^2SEM_InteractionMenu is up to date!^7')
+			if Config.VersionChecker == 0 then
+				print(resourceName)
 			end
+
+			if currentVersion ~= data.NewestVersion then
+				if Config.VersionChecker == 0 then
+					print('\n   ^1SEM_InteractionMenu is outdated!^7')
+					print('     Latest Version: ^2' .. data.NewestVersion .. '^7')
+					print('     Your Version: ^1' .. currentVersion .. '^7')
+					print('     Please download the leastest version from ^5' .. data.DownloadLocation .. '^7')
+
+					if data.Changes ~= '' then
+						print('\n     ^5Changes: ^7' .. data.Changes)
+					end
+				elseif Config.VersionChecker == 1 then
+					print('\n^1SEM_InteractionMenu is outdated!^7')
+					print('Latest Version: ^2' .. data.NewestVersion .. '^7')
+					print('Please download the leastest version from ^5' .. data.DownloadLocation .. '^7\n')
+				end
+			else
+				print('\n   ^2SEM_InteractionMenu is up to date!^7')
+			end
+
+			print('\n')
 		else
 			print('^1SEM_InteractionMenu Version Check Failed!^7')
 		end
@@ -220,7 +236,11 @@ Citizen.CreateThread(function()
 		SetTimeout(60000000, VersionCheckHTTPRequest)
 	end
 
-	if CurrentVersion then
-		VersionCheckHTTPRequest()
+	if Config.VersionChecker ~= 2 then
+		if currentVersion then
+			VersionCheckHTTPRequest()
+		else
+			print('^1SEM_InteractionMenu Version Check Failed!^7')
+		end
 	end
 end)

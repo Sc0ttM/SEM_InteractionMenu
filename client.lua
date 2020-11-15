@@ -2,7 +2,7 @@
 ──────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (client.lua) - Created by Scott M
-	Current Version: v1.6.2 (Oct 2020)
+	Current Version: v1.7 (Nov 2020)
 	
 	Support: https://semdevelopment.com/discord
 	
@@ -18,7 +18,7 @@
 local isCuffed = false
 RegisterNetEvent('SEM_InteractionMenu:Cuff')
 AddEventHandler('SEM_InteractionMenu:Cuff', function()
-	local Ped = GetPlayerPed(-1)
+	local Ped = PlayerPedId()
 	if (DoesEntityExist(Ped)) then
 		Citizen.CreateThread(function()
             RequestAnimDict('mp_arresting')
@@ -28,6 +28,7 @@ AddEventHandler('SEM_InteractionMenu:Cuff', function()
 
             if isCuffed then
                 isCuffed = false
+                Citizen.Wait(500)
                 SetEnableHandcuffs(Ped, false)
                 ClearPedTasksImmediately(Ped)
             else
@@ -42,11 +43,10 @@ end)
 --Cuff Animation & Restructions
 Citizen.CreateThread(function()
 	while true do
-		Citizen.Wait(0)
+		Citizen.Wait(1)
 
         if isCuffed then
             if not IsEntityPlayingAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 3) then
-                Citizen.Wait(3000)
                 TaskPlayAnim(GetPlayerPed(PlayerId()), 'mp_arresting', 'idle', 8.0, -8, -1, 49, 0, 0, 0, 0)
             end
 
@@ -85,7 +85,8 @@ end)
 --Drag Attachment
 Citizen.CreateThread(function()
     while true do
-      Wait(0)
+        Citizen.Wait(1)
+
         if Drag then
             local Ped = GetPlayerPed(GetPlayerFromServerId(OfficerDrag))
             local Ped2 = PlayerPedId()
@@ -127,24 +128,18 @@ end)
 
 
 
---Spike Strip Events & Functions
-local SpawnedSpikes = {}
-local SpikeModel = 'P_ld_stinger_s'
-local SpikesSpawned = false
-local NearSpikes = false
-local IsPedNear = false
-
 --Spike Strip Spawn Event
+local SpawnedSpikes = {}
 RegisterNetEvent('SEM_InteractionMenu:Spikes-SpawnSpikes')
-AddEventHandler('SEM_InteractionMenu:Spikes-SpawnSpikes', function()
-    if IsPedInAnyVehicle(GetPlayerPed(-1), false) then
+AddEventHandler('SEM_InteractionMenu:Spikes-SpawnSpikes', function(Length)
+    if IsPedInAnyVehicle(PlayerPedId(), false) then
         Notify('~r~You can\'t set spikes while in a vehicle!')
         return
     end
 
     local SpawnCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()) , 0.0, 2.0, 0.0)
-    for a = 1, 3 do
-        local Spike = CreateObject(GetHashKey(SpikeModel), SpawnCoords.x, SpawnCoords.y, SpawnCoords.z, 1, 1, 1)
+    for a = 1, Length do
+        local Spike = CreateObject(GetHashKey('P_ld_stinger_s'), SpawnCoords.x, SpawnCoords.y, SpawnCoords.z, 1, 1, 1)
         local NetID = NetworkGetNetworkIdFromEntity(Spike)
         SetNetworkIdExistsOnAllMachines(NetID, true)
         SetNetworkIdCanMigrate(NetID, false)
@@ -154,114 +149,58 @@ AddEventHandler('SEM_InteractionMenu:Spikes-SpawnSpikes', function()
         SpawnCoords = GetOffsetFromEntityInWorldCoords(Spike, 0.0, 4.0, 0.0)
         table.insert(SpawnedSpikes, NetID)
     end
-    SpikesSpawned = true
 end)
 
 --Spike Strip Delete Event
 RegisterNetEvent('SEM_InteractionMenu:Spikes-DeleteSpikes')
-AddEventHandler('SEM_InteractionMenu:Spikes-DeleteSpikes', function(NetID)
-    Citizen.CreateThread(function()
-        local Spike = NetworkGetEntityFromNetworkId(NetID)
+AddEventHandler('SEM_InteractionMenu:Spikes-DeleteSpikes', function()
+    for a = 1, #SpawnedSpikes do
+        local Spike = NetworkGetEntityFromNetworkId(SpawnedSpikes[a])
         DeleteEntity(Spike)
-    end)
-end)
-
---Spike Strip Check Distance Ped
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        local Ped = PlayerPedId()
-        local PedPos = GetEntityCoords(Ped, false)
-
-        local Spikes = GetClosestObjectOfType(PedPos.x, PedPos.y, PedPos.z, 80.0, GetHashKey(SpikeModel), 1, 1, 1)
-        local SpikesPos = GetEntityCoords(Spikes, false)
-
-        local Distance = Vdist(PedPos.x, PedPos.y, PedPos.z, SpikesPos.x, SpikesPos.y, SpikesPos.z)
-
-        if SpikesSpawned then
-            if Distance ~= 0 and Distance < 5 then
-                NotifyHelp('~b~Remove Spike Strips~w~, Press ~INPUT_CHARACTER_WHEEL~ + ~INPUT_PHONE~')
-                if (IsControlPressed(1, 19) and IsControlJustPressed(1, 27)) and GetLastInputMethod(2) then
-                    RemoveSpikes()
-                    SpikesSpawned = false
-                end
-            elseif Distance > 5 and Distance < 25 then
-                NotifyHelp('~o~Move Closer to Remove the Spike Strips!')
-            elseif Distance > 150 then
-                RemoveSpikes()
-                SpikesSpawned = false
-            end
-        end
     end
-end)
-
---Spike Strip Check Distance Veh
-Citizen.CreateThread(function()
-    while true do
-        if IsPedInAnyVehicle(GetPlayerPed(PlayerId()) , false) then
-            local Vehicle = GetVehiclePedIsIn(GetPlayerPed(PlayerId()) , false)
-            if GetPedInVehicleSeat(Vehicle, -1) == GetPlayerPed(PlayerId())  then
-                local VehiclePos = GetEntityCoords(Vehicle, false)
-                local Spikes = GetClosestObjectOfType(VehiclePos.x, VehiclePos.y, VehiclePos.z, 80.0, GetHashKey(SpikeModel), 1, 1, 1)
-                local SpikePos = GetEntityCoords(Spikes, false)
-                local Distance = Vdist(VehiclePos.x, VehiclePos.y, VehiclePos.z, SpikePos.x, SpikePos.y, SpikePos.z)
-
-                if Spikes ~= 0 then
-                    NearSpikes = true
-                else
-                    NearSpikes = false
-                end
-            else
-                NearSpikes = false
-            end
-        else
-            NearSpikes = false
-        end
-
-        Citizen.Wait(0)
-    end
+    Notify('~r~Spikes Strips Removed!')
+    SpawnedSpikes = {}
 end)
 
 --Spike Strip Tire Popping
 Citizen.CreateThread(function()
     while true do
-        if NearSpikes then
-            local Tires = {
-                {bone = 'wheel_lf', index = 0},
-                {bone = 'wheel_rf', index = 1},
-                {bone = 'wheel_lm', index = 2},
-                {bone = 'wheel_rm', index = 3},
-                {bone = 'wheel_lr', index = 4},
-                {bone = 'wheel_rr', index = 5}
-            }
+        Citizen.Wait(25)
 
-            for a = 1, #Tires do
-                local Vehicle = GetVehiclePedIsIn(GetPlayerPed(PlayerId()) , false)
-                local TirePos = GetWorldPositionOfEntityBone(Vehicle, GetEntityBoneIndexByName(Vehicle, Tires[a].bone))
-                local Spike = GetClosestObjectOfType(TirePos.x, TirePos.y, TirePos.z, 15.0, GetHashKey(SpikeModel), 1, 1, 1)
-                local SpikePos = GetEntityCoords(Spike, false)
-                local Distance = Vdist(TirePos.x, TirePos.y, TirePos.z, SpikePos.x, SpikePos.y, SpikePos.z)
+        if IsPedInAnyVehicle(PlayerPedId() , false) then
+            local Vehicle = GetVehiclePedIsIn(PlayerPedId() , false)
 
-                if Distance < 1.8 then
-                    if not IsVehicleTyreBurst(Vehicle, Tires[a].index, true) or IsVehicleTyreBurst(Vehicle, Tires[a].index, false) then
-                        SetVehicleTyreBurst(Vehicle, Tires[a].index, false, 1000.0)
+            if GetPedInVehicleSeat(Vehicle, -1) == PlayerPedId()  then
+                local VehiclePos = GetEntityCoords(Vehicle, false)
+                local Spike = GetClosestObjectOfType(VehiclePos.x, VehiclePos.y, VehiclePos.z, 2.0, GetHashKey('P_ld_stinger_s'), 1, 1, 1)
+
+                if Spike ~= 0 then
+                    local Tires = {
+                        {bone = 'wheel_lf', index = 0},
+                        {bone = 'wheel_rf', index = 1},
+                        {bone = 'wheel_lm', index = 2},
+                        {bone = 'wheel_rm', index = 3},
+                        {bone = 'wheel_lr', index = 4},
+                        {bone = 'wheel_rr', index = 5}
+                    }
+        
+                    for a = 1, #Tires do
+                        local TirePos = GetWorldPositionOfEntityBone(Vehicle, GetEntityBoneIndexByName(Vehicle, Tires[a].bone))
+                        local Spike = GetClosestObjectOfType(TirePos.x, TirePos.y, TirePos.z, 2.0, GetHashKey('P_ld_stinger_s'), 1, 1, 1)
+                        local SpikePos = GetEntityCoords(Spike, false)
+                        local Distance = Vdist(TirePos.x, TirePos.y, TirePos.z, SpikePos.x, SpikePos.y, SpikePos.z)
+            
+                        if Distance < 1.8 then
+                            if not IsVehicleTyreBurst(Vehicle, Tires[a].index, true) or IsVehicleTyreBurst(Vehicle, Tires[a].index, false) then
+                                SetVehicleTyreBurst(Vehicle, Tires[a].index, false, 1000.0)
+                            end
+                        end
                     end
                 end
             end
         end
-
-        Citizen.Wait(0)
     end
 end)
-
---Spike Strip Remove Function
-function RemoveSpikes()
-    for a = 1, #SpawnedSpikes do
-        TriggerServerEvent('SEM_InteractionMenu:Spikes-TriggerDeleteSpikes', SpawnedSpikes[a])
-    end
-    Notify('~r~Spikes Strips Removed!')
-    SpawnedSpikes = {}
-end
 
 
 
@@ -326,7 +265,7 @@ AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
 
     OriginalJailTime = JailTime
 
-    local Ped = GetPlayerPed(-1)
+    local Ped = PlayerPedId()
     if DoesEntityExist(Ped) then
         Citizen.CreateThread(function()
             SetEntityCoords(Ped, Config.JailLocation.Jail.x, Config.JailLocation.Jail.y, Config.JailLocation.Jail.z)
@@ -343,7 +282,7 @@ AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
                     TriggerEvent('chat:addMessage', {
                         multiline = true,
                         color = {86, 96, 252},
-                        args = {'Judge', JailTime .. ' seconds until release.'},
+                        args = {'Judge', JailTime .. ' months until release.'},
                     })
 				end
 
@@ -367,7 +306,7 @@ AddEventHandler('SEM_InteractionMenu:JailPlayer', function(JailTime)
             if EarlyRelease then
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail on Parole')
             else
-                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail after ' .. OriginalJailTime .. ' second(s).')
+                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Judge', GetPlayerName(PlayerId()) .. ' was released from Jail after ' .. OriginalJailTime .. ' months(s).')
             end
             SetEntityCoords(Ped, Config.JailLocation.Release.x, Config.JailLocation.Release.y, Config.JailLocation.Release.z)
             SetEntityHeading(Ped, Config.JailLocation.Release.h)
@@ -389,11 +328,10 @@ CarbineEquipped = false
 ShotgunEquipped = false
 Citizen.CreateThread(function()
     while true do 
-        Citizen.Wait(0)
+        Citizen.Wait(50)
 
         if Config.UnrackWeapons == 1 then
-            local Ped = GetPlayerPed(-1)
-            local Veh = GetVehiclePedIsIn(Ped)
+            local Ped = PlayerPedId()
             local CurrentWeapon = GetSelectedPedWeapon(Ped)
         
             if CarbineEquipped then
@@ -475,7 +413,7 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
 
     OriginalHospitalTime = HospitalTime
 
-    local Ped = GetPlayerPed(-1)
+    local Ped = PlayerPedId()
     if DoesEntityExist(Ped) then
         Citizen.CreateThread(function()
             SetEntityCoords(Ped, HospitalLocation.Hospital.x, HospitalLocation.Hospital.y, HospitalLocation.Hospital.z)
@@ -492,7 +430,7 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
                     TriggerEvent('chat:addMessage', {
                         multiline = true,
                         color = {86, 96, 252},
-                        args = {'Doctor', HospitalTime .. ' seconds until release.'},
+                        args = {'Doctor', HospitalTime .. ' months until release.'},
                     })
 				end
 
@@ -516,7 +454,7 @@ AddEventHandler('SEM_InteractionMenu:HospitalizePlayer', function(HospitalTime, 
             if EarlyDischarge then
                 TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital early')
             else
-                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' second(s).')
+                TriggerServerEvent('SEM_InteractionMenu:GlobalChat', {86, 96, 252}, 'Doctor', GetPlayerName(PlayerId()) .. ' was discharged from Hospital after ' .. OriginalHospitalTime .. ' months(s).')
             end
             SetEntityCoords(Ped, HospitalLocation.Release.x, HospitalLocation.Release.y, HospitalLocation.Release.z)
             SetEntityHeading(Ped, HospitalLocation.Release.h)
@@ -619,6 +557,8 @@ end)
 --Emote
 Citizen.CreateThread(function()
     while true do
+        Citizen.Wait(1)
+
         if EmotePlaying then
             if Config.EmoteHelp then
                 NotifyHelp('You are playing an Emote, ~b~Move to Cancel')
@@ -629,7 +569,6 @@ Citizen.CreateThread(function()
                 CancelEmote()
             end
         end
-        Citizen.Wait(0)
     end
 end)
 
@@ -665,6 +604,10 @@ Citizen.CreateThread(function()
     TriggerEvent('chat:addSuggestion', '/dropweapon', 'Drops Weapon in Hand')
     TriggerEvent('chat:addSuggestion', '/loadout', 'Equips LEO Weapon Loadout')
     TriggerEvent('chat:addSuggestion', '/coords', 'Shows Current Player Coords and Heading')
+
+    if Config.Radar ~= 0 then
+        TriggerEvent('chat:addSuggestion', '/radar', 'Toggle Radar Menu')
+    end
 
     if Config.LEOAccess == 3 or Config.FireAccess == 3 then
         if Config.OndutyPSWDActive then
@@ -776,19 +719,52 @@ RegisterCommand('drag', function(source, args, rawCommand)
     end
 end)
 
+RegisterCommand('radar', function(source, args, rawCommand)
+    if Config.Radar ~= 0 then
+        if LEORestrict() or FireRestrict() then
+            ToggleRadar()
+        else
+            Notify('~r~Insufficient Permissions')
+        end
+    end
+end)
+
 RegisterCommand('loadout', function(source, args, rawCommand)
     if LEORestrict() then
-        SetEntityHealth(GetPlayerPed(-1), 200)
-        RemoveAllPedWeapons(GetPlayerPed(-1), true)
-        AddArmourToPed(GetPlayerPed(-1), 100)
-        GiveWeapon('weapon_nightstick')
-        GiveWeapon('weapon_flashlight')
-        GiveWeapon('weapon_fireextinguisher')
-        GiveWeapon('weapon_flare')
-        GiveWeapon('weapon_stungun')
-        GiveWeapon('weapon_combatpistol')
-        AddWeaponComponent('weapon_combatpistol', 'component_at_pi_flsh')
-        Notify('~g~Loadout Spawned')
+        if args[1] then
+            local RequestedLoadout = args[1]
+            
+            for Name, Loadout in pairs(Config.LEOLoadouts) do
+                if Name:lower() == RequestedLoadout:lower() then
+                    SetEntityHealth(GetPlayerPed(-1), 200)
+                    RemoveAllPedWeapons(GetPlayerPed(-1), true)
+                    AddArmourToPed(GetPlayerPed(-1), 100)
+
+                    for _, Weapon in pairs(Loadout) do
+                        GiveWeapon(Weapon.weapon)
+                                                                
+                        for _, Component in pairs(Weapon.components) do
+                            AddWeaponComponent(Weapon.weapon, Component)
+                        end
+                    end
+                    return
+                end
+            end
+
+            Notify('~r~Invalid Loadout')
+        else
+            SetEntityHealth(PlayerPedId(), 200)
+            RemoveAllPedWeapons(PlayerPedId(), true)
+            AddArmourToPed(PlayerPedId(), 100)
+            GiveWeapon('weapon_nightstick')
+            GiveWeapon('weapon_flashlight')
+            GiveWeapon('weapon_fireextinguisher')
+            GiveWeapon('weapon_flare')
+            GiveWeapon('weapon_stungun')
+            GiveWeapon('weapon_combatpistol')
+            AddWeaponComponent('weapon_combatpistol', 'component_at_pi_flsh')
+            Notify('~g~Loadout Spawned')
+        end
     else
         Notify('~r~You aren\'t an LEO')
     end
@@ -827,14 +803,14 @@ RegisterCommand('huk', function(source, args, rawCommand)
 end)
 
 RegisterCommand('dropweapon', function(source, args, rawCommand)
-    local CurrentWeapon = GetSelectedPedWeapon(GetPlayerPed(-1))
-    SetPedDropsInventoryWeapon(GetPlayerPed(-1), CurrentWeapon, -2.0, 0.0, 0.5, 30)
+    local CurrentWeapon = GetSelectedPedWeapon(PlayerPedId())
+    SetPedDropsInventoryWeapon(PlayerPedId(), CurrentWeapon, -2.0, 0.0, 0.5, 30)
     Notify('~r~Weapon Dropped!')
 end)
 
 RegisterCommand('clear', function(source, args, rawCommand)
-    SetEntityHealth(GetPlayerPed(-1), 200)
-    RemoveAllPedWeapons(GetPlayerPed(-1), true)
+    SetEntityHealth(PlayerPedId(), 200)
+    RemoveAllPedWeapons(PlayerPedId(), true)
     Notify('~r~All Weapons Cleared!')
 end)
 

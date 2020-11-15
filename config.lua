@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (config.lua) - Created by Scott M
-	Current Version: v1.6.2 (Oct 2020)
+	Current Version: v1.7 (Nov 2020)
 	
 	Support: https://semdevelopment.com/discord
 
@@ -20,6 +20,10 @@ Config = {}
 --                      Menu Features                        --
 --                                                           --
 ---------------------------------------------------------------
+
+--This is how the version check will be displayed in the server console
+--Full = 0 [Default] | Simple = 1 | Disabled = 2
+Config.VersionChecker = 0
 
 --This is how you open the menu either via a command or button
 --Button = 0 [Default]  |  Command = 1
@@ -401,15 +405,12 @@ Config.ShowFireSpawnCode = true
 Config.FireVehicles = {
 	--[[
         EXAMPLE: 
-		['a'] = {
-		    {name = 'b', spawncode = 'c', livery = d, extras = {e, e}},
-		}
+		{name = 'a', spawncode = 'b', livery = c, extras = {d, d}},
         ────────────────────────────────────────────────────────────────
-        'a' is the title of the Category
-        'b' is the title of the vehicle that shows in the menu
-        'c' is the spawn code for vehicle that will be spawned
-         d  is the number of the livery which you want it to spawn with
-         e  is the number(s) of extra(s) which you want it to spawn with
+        'a' is the title of the vehicle that shows in the menu
+        'b' is the spawn code for vehicle that will be spawned
+        'c' is the number of the livery which you want it to spawn with
+        'd'  is the number(s) of extra(s) which you want it to spawn with
 
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]

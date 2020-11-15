@@ -2,7 +2,7 @@
 ───────────────────────────────────────────────────────────────
 
 	SEM_InteractionMenu (menu.lua) - Created by Scott M
-	Current Version: v1.6.2 (Oct 2020)
+	Current Version: v1.7 (Nov 2020)
 	
 	Support | https://semdevelopment.com/discord
 	
@@ -65,25 +65,27 @@ function Menu()
         LEOMenu:SetMenuWidthOffset(Config.MenuWidth)
             local LEOActions = _MenuPool:AddSubMenu(LEOMenu, 'Actions', '', true)
             LEOActions:SetMenuWidthOffset(Config.MenuWidth)
-                local Cuff = NativeUI.CreateItem('Cuff', 'Cuff Closest Player')
-                local Drag = NativeUI.CreateItem('Drag', 'Drags Closest Player')
-                local Seat = NativeUI.CreateItem('Seat', 'Puts Player in Vehicle')
-                local Unseat = NativeUI.CreateItem('Unseat', 'Removes Player from Vehicle')
-                local Radar = NativeUI.CreateItem('Radar', 'Toggles Wraith Radar')
-                local Inventory = NativeUI.CreateItem('Inventory', 'Search Inventory')
-                local BAC = NativeUI.CreateItem('BAC', 'Tests BAC Level')
-                local Jail = NativeUI.CreateItem('Jail', 'Jail Player')
-                local Unjail = NativeUI.CreateItem('Unjail', 'Unjails Player')
-                local Spikes = NativeUI.CreateItem('Deploy Spikes', 'Places Spike Strips in Front of Player')
-                local Shield = NativeUI.CreateItem('Toggle Shield', 'Toggles Bulletproof Shield')
-                local CarbineRifle = NativeUI.CreateItem('Toggle Carbine', 'Toggles Carbine Rifle')
-                local Shotgun = NativeUI.CreateItem('Toggle Shotgun', 'Toggles Shotgun')
+                local Cuff = NativeUI.CreateItem('Cuff', 'Cuff/Uncuff the closest player')
+                local Drag = NativeUI.CreateItem('Drag', 'Drag/Undrag the closest player')
+                local Seat = NativeUI.CreateItem('Seat', 'Place a player in the closest vehicle')
+                local Unseat = NativeUI.CreateItem('Unseat', 'Remove a player from the closest vehicle')
+                local Radar = NativeUI.CreateItem('Radar', 'Toggle the radar menu')
+                local Inventory = NativeUI.CreateItem('Inventory', 'Search the closest player\'s inventory')
+                local BAC = NativeUI.CreateItem('BAC', 'Test the BAC level of the closest player')
+                local Jail = NativeUI.CreateItem('Jail', 'Jail a player')
+                local Unjail = NativeUI.CreateItem('Unjail', 'Unjail a player')
+                SpikeLengths = {1, 2, 3, 4, 5}
+                local Spikes = NativeUI.CreateListItem('Deploy Spikes', SpikeLengths, 1, 'Places spike strips on the ground')
+                local DelSpikes = NativeUI.CreateItem('Remove Spikes', 'Remove spike strips placed on the ground')
+                local Shield = NativeUI.CreateItem('Toggle Shield', 'Toggle the bulletproof shield')
+                local CarbineRifle = NativeUI.CreateItem('Toggle Carbine', 'Toggle your carbine rifle')
+                local Shotgun = NativeUI.CreateItem('Toggle Shotgun', 'Toggle your pump shotgun')
                 PropsList = {}
                 for _, Prop in pairs(Config.Props) do
                     table.insert(PropsList, Prop.name)
                 end
-                local Props = NativeUI.CreateListItem('Spawn Props', PropsList, 1, 'Spawn Objects/Props')
-                local RemoveProps = NativeUI.CreateItem('Remove Props', 'Removes Spawned Props')
+                local Props = NativeUI.CreateListItem('Spawn Props', PropsList, 1, 'Spawn props on the ground')
+                local RemoveProps = NativeUI.CreateItem('Remove Props', 'Remove the closest prop')
                 LEOActions:AddItem(Cuff)
                 LEOActions:AddItem(Drag)
                 LEOActions:AddItem(Seat)
@@ -100,6 +102,7 @@ function Menu()
                     end
 				end
                 LEOActions:AddItem(Spikes)
+                LEOActions:AddItem(DelSpikes)
                 LEOActions:AddItem(Shield)
                 if Config.UnrackWeapons == 1 or Config.UnrackWeapons == 2 then
                     LEOActions:AddItem(CarbineRifle)
@@ -141,26 +144,7 @@ function Menu()
                     end
                 end
                 Radar.Activated = function(ParentMenu, SelectedItem)
-                    if Config.Radar ~= 0 then
-                        if IsPedInAnyVehicle(GetPlayerPed(-1)) then
-                            if GetVehicleClass(GetVehiclePedIsIn(GetPlayerPed(-1))) == 18 then
-                                if GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1)) == -1) then
-                                    _MenuPool:CloseAllMenus()
-                                    if Config.Radar == 1 then
-                                        TriggerEvent('wk:openRemote')
-                                    elseif Config.Radar == 2 then
-                                        TriggerEvent('wk:radarRC')
-                                    end
-                                else
-                                    Notify('~o~You need to be in the driver seat')
-                                end
-                            else
-                                Notify('~o~You need to be in a police vehicle')
-                            end
-                        else
-                            Notify('~o~You need to be in a vehicle')
-                        end
-                    end
+                    ToggleRadar()
                 end
                 Inventory.Activated = function(ParentMenu, SelectedItem)
                     local player = GetClosestPlayer()
@@ -204,8 +188,8 @@ function Menu()
 
                     TriggerServerEvent('SEM_InteractionMenu:Unjail', PlayerID)
                 end
-                Spikes.Activated = function(ParentMenu, SelectedItem)
-                    TriggerEvent('SEM_InteractionMenu:Spikes-SpawnSpikes')
+                DelSpikes.Activated = function(ParentMenu, SelectedItem)
+                    TriggerEvent('SEM_InteractionMenu:Spikes-DeleteSpikes')
                 end
                 Shield.Activated = function(ParentMenu, SelectedItem)
                     if ShieldActive then
@@ -252,7 +236,9 @@ function Menu()
                     end
                 end
                 LEOActions.OnListSelect = function(sender, item, index)
-                    if item == Props then
+                    if item == Spikes then
+                        TriggerEvent('SEM_InteractionMenu:Spikes-SpawnSpikes', tonumber(index))
+                    elseif item == Props then
                         for _, Prop in pairs(Config.Props) do
                             if Prop.name == item:IndexToItem(index) then
                                 SpawnProp(Prop.spawncode, Prop.name)
@@ -328,8 +314,8 @@ function Menu()
                     for _, Station in pairs(Config.LEOStations) do
                         local StationCategory = _MenuPool:AddSubMenu(LEOStation, Station.name, '', true)
                         StationCategory:SetMenuWidthOffset(Config.MenuWidth)
-                            local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Sets Waypoint to Station')
-                            local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to Station')
+                            local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Set a waypoint to the station')
+                            local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to the station')
                             StationCategory:AddItem(SetWaypoint)
                             if Config.AllowStationTeleport then
                                 StationCategory:AddItem(Teleport)
@@ -357,8 +343,8 @@ function Menu()
                         table.insert(LoadoutsList, Name)
                     end
 
-                    local Uniforms = NativeUI.CreateListItem('Uniforms', UniformsList, 1, 'Spawn Uniforms')
-                    local Loadouts = NativeUI.CreateListItem('Loadouts', LoadoutsList, 1, 'Spawns LEO Loadouts')
+                    local Uniforms = NativeUI.CreateListItem('Uniforms', UniformsList, 1, 'Spawn LEO uniforms')
+                    local Loadouts = NativeUI.CreateListItem('Loadouts', LoadoutsList, 1, 'Spawn LEO weapon loadouts')
                     if Config.DisplayLEOUniforms then
                         LEOLoadouts:AddItem(Uniforms)
                     end
@@ -503,9 +489,9 @@ function Menu()
         FireMenu:SetMenuWidthOffset(Config.MenuWidth)
             local FireActions = _MenuPool:AddSubMenu(FireMenu, 'Actions', '', true)
             FireActions:SetMenuWidthOffset(Config.MenuWidth)
-                local Drag = NativeUI.CreateItem('Drag', 'Drags Closest Player')
-                local Seat = NativeUI.CreateItem('Seat', 'Puts Player in Vehicle')
-                local Unseat = NativeUI.CreateItem('Unseat', 'Removes Player from Vehicle')
+                local Drag = NativeUI.CreateItem('Drag', 'Drag/Undrag the closest player')
+                local Seat = NativeUI.CreateItem('Seat', 'Place a player in the closest vehicle')
+                local Unseat = NativeUI.CreateItem('Unseat', 'Remove a player from the closest vehicle')
                 FireActions:AddItem(Drag)
                 FireActions:AddItem(Seat)
                 FireActions:AddItem(Unseat)
@@ -536,7 +522,7 @@ function Menu()
                     local HospitalLocations = _MenuPool:AddSubMenu(FireActions, 'Hospitalize', '', true)
                     HospitalLocations:SetMenuWidthOffset(Config.MenuWidth)
                         for HospitalName, HospitalInfo in pairs(Config.HospitalLocation) do
-                            local Hospitalize = NativeUI.CreateItem(HospitalName, 'Hospitalize Player')
+                            local Hospitalize = NativeUI.CreateItem(HospitalName, 'Hospitalize a player')
                             HospitalLocations:AddItem(Hospitalize)
                             Hospitalize.Activated = function(ParentMenu, SelectedItem)
                                 local PlayerID = tonumber(KeyboardInput('Player ID:', 10))
@@ -558,7 +544,7 @@ function Menu()
                                 TriggerServerEvent('SEM_InteractionMenu:Hospitalize', PlayerID, HospitalTime, HospitalInfo)
                             end
                         end
-                    local Unhospitalize = NativeUI.CreateItem('Unhospitalize', 'Unhospitalize Player')
+                    local Unhospitalize = NativeUI.CreateItem('Unhospitalize', 'Unhospitalize a player')
                     if UnhospitalAllowed then
                         FireActions:AddItem(Unhospitalize)
                     end
@@ -576,8 +562,8 @@ function Menu()
                 for _, Prop in pairs(Config.Props) do
                     table.insert(PropsList, Prop.name)
                 end
-                local Props = NativeUI.CreateListItem('Spawn Props', PropsList, 1, 'Spawn Objects/Props')
-                local RemoveProps = NativeUI.CreateItem('Remove Props', 'Removes Spawned Props')
+                local Props = NativeUI.CreateListItem('Spawn Props', PropsList, 1, 'Spawn props on the ground')
+                local RemoveProps = NativeUI.CreateItem('Remove Props', 'Remove the closest prop')
                 FireActions:AddItem(Props)
                 FireActions:AddItem(RemoveProps)
                 FireActions.OnListSelect = function(sender, item, index)
@@ -603,8 +589,8 @@ function Menu()
                         for _, Station in pairs(Config.FireStations) do
                             local StationCategory = _MenuPool:AddSubMenu(FireStation, Station.name, '', true)
                             StationCategory:SetMenuWidthOffset(Config.MenuWidth)
-                                local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Sets Waypoint to Station')
-                                local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to Station')
+                                local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Set a waypoint to the station')
+                                local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to the station')
                                 StationCategory:AddItem(SetWaypoint)
                                 if Config.AllowStationTeleport then
                                     StationCategory:AddItem(Teleport)
@@ -623,8 +609,8 @@ function Menu()
                         for _, Station in pairs(Config.HospitalStations) do
                             local StationCategory = _MenuPool:AddSubMenu(EMSStation, Station.name, '', true)
                             StationCategory:SetMenuWidthOffset(Config.MenuWidth)
-                                local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Sets Waypoint to Station')
-                                local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to Station')
+                                local SetWaypoint = NativeUI.CreateItem('Set Waypoint', 'Set a waypoint to the hospital')
+                                local Teleport = NativeUI.CreateItem('Teleport', 'Teleport to the hospital')
                                 StationCategory:AddItem(SetWaypoint)
                                 if Config.AllowStationTeleport then
                                     StationCategory:AddItem(Teleport)
@@ -651,8 +637,8 @@ function Menu()
                         'Clear',
                         'Standard',
                     }
-                    local Uniforms = NativeUI.CreateListItem('Uniforms', UniformsList, 1, 'Spawn Uniforms')
-                    local Loadouts = NativeUI.CreateListItem('Loadouts', LoadoutsList, 1, 'Spawns Fire Loadouts')
+                    local Uniforms = NativeUI.CreateListItem('Uniforms', UniformsList, 1, 'Spawn Fire uniforms')
+                    local Loadouts = NativeUI.CreateListItem('Loadouts', LoadoutsList, 1, 'Spawns Fire weapon loadouts')
                     if Config.DisplayFireUniforms then
                         FireLoadouts:AddItem(Uniforms)
                     end
@@ -716,11 +702,11 @@ function Menu()
         CivMenu:SetMenuWidthOffset(Config.MenuWidth)
             local CivActions = _MenuPool:AddSubMenu(CivMenu, 'Actions', '', true)
             CivActions:SetMenuWidthOffset(Config.MenuWidth)
-                local HU = NativeUI.CreateItem('HU', 'Hands Up')
-                local HUK = NativeUI.CreateItem('HUK', 'Hands Up and Kneel')
-                local Inventory = NativeUI.CreateItem('Inventory', 'Set Inventory')
-                local BAC = NativeUI.CreateItem('BAC', 'Set BAC Level')
-                local DropWeapon = NativeUI.CreateItem('Drop Weapon', 'Drops Weapon on the floor')
+                local HU = NativeUI.CreateItem('Hands Up', 'Put your hands up')
+                local HUK = NativeUI.CreateItem('Hand Up & Kneel', 'Put your hands up and kneel on the ground')
+                local Inventory = NativeUI.CreateItem('Inventory', 'Set your inventory')
+                local BAC = NativeUI.CreateItem('BAC', 'Set your BAC level')
+                local DropWeapon = NativeUI.CreateItem('Drop Weapon', 'Drop your current weapon on the ground')
                 CivActions:AddItem(HU)
                 CivActions:AddItem(HUK)
                 CivActions:AddItem(Inventory)
@@ -787,10 +773,10 @@ function Menu()
                     Notify('~r~Weapon Dropped!')
                 end
             if Config.ShowCivAdverts then
-                local CivAdverts = _MenuPool:AddSubMenu(CivMenu, 'Adverts', 'Civilian Adverts', true)
+                local CivAdverts = _MenuPool:AddSubMenu(CivMenu, 'Adverts', '', true)
                 CivAdverts:SetMenuWidthOffset(Config.MenuWidth)
                     for _, Ad in pairs(Config.CivAdverts) do
-                        local Advert  = NativeUI.CreateItem(Ad.name, '')
+                        local Advert  = NativeUI.CreateItem(Ad.name, 'Send an advert for ' .. Ad.name)
                         CivAdverts:AddItem(Advert)
                         Advert.Activated = function(ParentMenu, SelectedItem)
                             local Message = KeyboardInput('Message:', 128)
@@ -830,16 +816,24 @@ function Menu()
             local Seats = {-1, 0, 1, 2}
             local Windows = {'Front', 'Rear', 'All'}
             local Doors = {'Driver', 'Passenger', 'Rear Right', 'Rear Left', 'Hood', 'Trunk', 'All'}
-            local Engine = NativeUI.CreateItem('Toggle Engine', 'Toggles Vehicle\'s Engine')
-            local ILights = NativeUI.CreateItem('Toggle Interior Light', 'Toggles Vehicle\'s Interior Light')
-            local Seat = NativeUI.CreateSliderItem('Change Seats', Seats, 1, 'Change Seats in a Vehicle')
-            local Window = NativeUI.CreateListItem('Windows', Windows, 1, 'Open/Close Windows')
-            local Door = NativeUI.CreateListItem('Doors', Doors, 1, 'Open/Close Doors')
+            local Engine = NativeUI.CreateItem('Toggle Engine', 'Toggle your vehicle\'s engine')
+            local ILights = NativeUI.CreateItem('Toggle Interior Light', 'Toggle your vehicle\'s interior light')
+            local Seat = NativeUI.CreateSliderItem('Change Seats', Seats, 1, 'Switch to a different seat')
+            local Window = NativeUI.CreateListItem('Windows', Windows, 1, 'Open/Close your vehicle\'s windows')
+            local Door = NativeUI.CreateListItem('Doors', Doors, 1, 'Open/Close your vehicle\'s doors')
+            local FixVeh = NativeUI.CreateItem('Repair Vehicle', 'Repair your current vehicle')
+            local CleanVeh = NativeUI.CreateItem('Clean Vehicle', 'Clean your current vehicle')
+            local DelVeh = NativeUI.CreateItem('~r~Delete Vehicle', 'Delete your current vehicle')
             VehicleMenu:AddItem(Engine)
             VehicleMenu:AddItem(ILights)
             VehicleMenu:AddItem(Seat)
             VehicleMenu:AddItem(Window)
             VehicleMenu:AddItem(Door)
+            if Config.VehicleOptions then
+                VehicleMenu:AddItem(FixVeh)
+                VehicleMenu:AddItem(CleanVeh)
+                VehicleMenu:AddItem(DelVeh)
+            end
             Engine.Activated = function(ParentMenu, SelectedItem)
                 local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
                 if Vehicle ~= nil and Vehicle ~= 0 and GetPedInVehicleSeat(Vehicle, 0) then
@@ -997,53 +991,44 @@ function Menu()
                     end
                 end
             end
-
-            if Config.VehicleOptions then
-                local FixVeh = NativeUI.CreateItem('Repair Vehicle', 'Repairs Current Vehicle')
-                local CleanVeh = NativeUI.CreateItem('Clean Vehicle', 'Cleans Current Vehicle')
-                local DelVeh = NativeUI.CreateItem('~r~Delete Vehicle', 'Deletes Current Vehicle')
-                VehicleMenu:AddItem(FixVeh)
-                VehicleMenu:AddItem(CleanVeh)
-                VehicleMenu:AddItem(DelVeh)
-                FixVeh.Activated = function(ParentMenu, SelectedItem)
-                    local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-                    if Vehicle ~= nil and Vehicle ~= 0 then
-                        SetVehicleEngineHealth(Vehicle, 100)
-                        SetVehicleFixed(Vehicle)
-                        Notify('~g~Vehicle Repaired!')
-                    else
-                        Notify('~r~You\'re not in a Vehicle!')
-                    end
-
+            FixVeh.Activated = function(ParentMenu, SelectedItem)
+                local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+                if Vehicle ~= nil and Vehicle ~= 0 then
+                    SetVehicleEngineHealth(Vehicle, 100)
+                    SetVehicleFixed(Vehicle)
+                    Notify('~g~Vehicle Repaired!')
+                else
+                    Notify('~r~You\'re not in a Vehicle!')
                 end
-                CleanVeh.Activated = function(ParentMenu, SelectedItem)
-                    local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-                    if Vehicle ~= nil and Vehicle ~= 0 then
-                        SetVehicleDirtLevel(Vehicle, 0)
-                        Notify('~g~Vehicle Cleaned!')
-                    else
-                        Notify('~r~You\'re not in a Vehicle!')
-                    end
+
+            end
+            CleanVeh.Activated = function(ParentMenu, SelectedItem)
+                local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+                if Vehicle ~= nil and Vehicle ~= 0 then
+                    SetVehicleDirtLevel(Vehicle, 0)
+                    Notify('~g~Vehicle Cleaned!')
+                else
+                    Notify('~r~You\'re not in a Vehicle!')
                 end
-                DelVeh.Activated = function(ParentMenu, SelectedItem)
-                    if (IsPedSittingInAnyVehicle(PlayerPedId())) then 
-                        local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+            end
+            DelVeh.Activated = function(ParentMenu, SelectedItem)
+                if (IsPedSittingInAnyVehicle(PlayerPedId())) then 
+                    local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
 
-                        if (GetPedInVehicleSeat(Vehicle, -1) == PlayerPedId()) then 
-                            SetEntityAsMissionEntity(Vehicle, true, true)
-                            DeleteVehicle(Vehicle)
+                    if (GetPedInVehicleSeat(Vehicle, -1) == PlayerPedId()) then 
+                        SetEntityAsMissionEntity(Vehicle, true, true)
+                        DeleteVehicle(Vehicle)
 
-                            if (DoesEntityExist(Vehicle)) then 
-                                Notify('~o~Unable to delete vehicle, try again.')
-                            else 
-                                Notify('~r~Vehicle Deleted!')
-                            end 
+                        if (DoesEntityExist(Vehicle)) then 
+                            Notify('~o~Unable to delete vehicle, try again.')
                         else 
-                            Notify('~r~You must be in the driver\'s seat!')
+                            Notify('~r~Vehicle Deleted!')
                         end 
-                    else
-                        Notify('~r~You\'re not in a Vehicle!')
-                    end
+                    else 
+                        Notify('~r~You must be in the driver\'s seat!')
+                    end 
+                else
+                    Notify('~r~You\'re not in a Vehicle!')
                 end
             end
     end
