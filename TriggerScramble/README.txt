@@ -1,0 +1,1 @@
+Drag both jer.py and windows.bat into the SEM Resource folder (where the configs are located and server.lua) open the windows.bat follow instructions, then done. Delete the jer.py and windows.bat
