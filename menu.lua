@@ -1072,28 +1072,22 @@ Citizen.CreateThread(function()
 		_MenuPool:ControlDisablingEnabled(false)
 		_MenuPool:MouseControlsEnabled(false)
 		
-		if IsControlJustPressed(1, Config.MenuButton) and GetLastInputMethod(2) then
-			if not menuOpen then
-				Menu()
-                MainMenu:Visible(true)
-            else
-                _MenuPool:CloseAllMenus()
-			end
-		end
 	end
 end)
 
-
+if Config.EnableButton then
+    RegisterKeyMapping(Config.Command, 'Open Interaction Menu', 'keyboard', Config.MenuButton)
+end
 
 RegisterCommand(Config.Command, function(source, args, rawCommands)
-    if Config.OpenMenu == 1 then
+    if not menuOpen then
         Menu()
         MainMenu:Visible(true)
+    else
+        _MenuPool:CloseAllMenus()
     end
 end)
 
 Citizen.CreateThread(function()
-    if Config.OpenMenu == 1 then
-        TriggerEvent('chat:addSuggestion', '/' .. Config.Command, 'Used to open SEM_InteractionMenu')
-    end
+    TriggerEvent('chat:addSuggestion', '/' .. Config.Command, 'Used to open SEM_InteractionMenu')
 end)
