@@ -16,6 +16,8 @@ Current Version: **v1.7.1**
 
 Changes: **• Fixes menu item skipping**
 
+**THIS UPDATE *ONLY* AFFECTS THE DEPENDENCY NATIVEUI - YOU CAN JUST UPDATE THAT *(NO OTHER FILES WERE CHANGED!)***
+
 
 ### Links:
 
