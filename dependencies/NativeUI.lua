@@ -3641,9 +3641,6 @@ function MenuPool:AddSubMenu(Menu, Text, Description, KeepPosition, KeepBanner)
                 SubMenu.Banner = Menu.Banner
             end
         end
-        if Config_Menu.Arrows then
-            Item:RightLabel('→→→')
-        end
         self:Add(SubMenu)
         Menu:BindMenuToItem(SubMenu, Item)
         return SubMenu
