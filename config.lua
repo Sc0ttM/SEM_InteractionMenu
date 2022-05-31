@@ -280,14 +280,27 @@ Config.LEOVehiclesCategories = {
 	--[[
         EXAMPLE: 
 		['a'] = {
-		    {name = 'b', spawncode = 'c', livery = d, extras = {e, e}},
+		    {name = 'b', spawncode = 'c', livery = d, color = e, extras = {f, f}, mods = {{g,h},{g,h}}, trailer = 'i', trailerlivery = j, trailerextras = {k, k}, boat = 'l', boatlivery = m, boatcolor = n, boatextras = o, boatxoffset = p, boatyoffset = q, boatzoffset = r},
 		}
         ────────────────────────────────────────────────────────────────
         'a' is the title of the Category
         'b' is the title of the vehicle that shows in the menu
         'c' is the spawn code for vehicle that will be spawned
          d  is the number of the livery which you want it to spawn with
-         e  is the number(s) of extra(s) which you want it to spawn with
+         e  is the number of the color which you want it to spawn with (see color list here: https://pastebin.com/pwHci0xK)
+         f  is the number(s) of extra(s) which you want it to spawn with
+         g  is the number(s) of the mod type(s) that you want to set (see mod list here: https://docs.fivem.net/natives/?_0x6AF0636DDEDCB6DD)
+         h  is the number(s) of the mod variation(s) that you want
+        'i'  is the spawn code for trailer
+         j  is the number of the livery which you want the trailer to spawn with
+         k  is the number(s) of extra(s) which you want the trailer to spawn with
+        'l'  is the spawn code for boat (or other vehicle to be carried by the trailer)
+         m  is the number of the livery which you want the boat to spawn with
+         n  is the number of the color which you want the boat to spawn with
+         o  is the number(s) of extra(s) which you want the boat to spawn with
+         p  is the x-axis (left/right) offset of the boat compared to the trailer (required if 'boat' is set)
+         q  is the y-axis (forward/back) offset of the boat compared to the trailer (required if 'boat' is set)
+         r  is the z-axis (up/down) offset of the boat compared to the trailer (required if 'boat' is set)
 
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]
@@ -305,6 +318,7 @@ Config.LEOVehiclesCategories = {
 
     ['Unmarked'] = {
         {name = 'Unmarked', spawncode = 'police4'},
+        {name = 'Unmarked with boat', spawncode = 'bison', color = 111, mods = {{14,3}, {23,4}}, trailer = 'boattrailer', boat = 'dinghy', boatcolor = 0, boatxoffset = 0, boatyoffset = -1.12, boatzoffset = 0.22}
     },
 }
 
@@ -405,12 +419,25 @@ Config.ShowFireSpawnCode = true
 Config.FireVehicles = {
 	--[[
         EXAMPLE: 
-		{name = 'a', spawncode = 'b', livery = c, extras = {d, d}},
+		{name = 'a', spawncode = 'b', livery = c, color = d, extras = {e, e}, mods = {{f,g},{f,g}}, trailer = 'h', trailerlivery = i, trailerextras = {j, j}, boat = 'k', boatlivery = l, boatcolor = m, boatextras = n, boatxoffset = o, boatyoffset = p, boatzoffset = q},
         ────────────────────────────────────────────────────────────────
         'a' is the title of the vehicle that shows in the menu
         'b' is the spawn code for vehicle that will be spawned
-        'c' is the number of the livery which you want it to spawn with
-        'd'  is the number(s) of extra(s) which you want it to spawn with
+         c  is the number of the livery which you want it to spawn with
+         d  is the number of the color which you want it to spawn with (see color list here: https://pastebin.com/pwHci0xK)
+         e  is the number(s) of extra(s) which you want it to spawn with
+         f  is the number(s) of the mod type(s) that you want to set (see mod list here: https://docs.fivem.net/natives/?_0x6AF0636DDEDCB6DD)
+         g  is the number(s) of the mod variation(s) that you want
+        'h'  is the spawn code for trailer
+         i  is the number of the livery which you want the trailer to spawn with
+         j  is the number(s) of extra(s) which you want the trailer to spawn with
+        'k'  is the spawn code for boat (or other vehicle to be carried by the trailer)
+         l  is the number of the livery which you want the boat to spawn with
+         m  is the number of the color which you want the boat to spawn with
+         n  is the number(s) of extra(s) which you want the boat to spawn with
+         o  is the x-axis (left/right) offset of the boat compared to the trailer (required if 'boat' is set)
+         p  is the y-axis (forward/back) offset of the boat compared to the trailer (required if 'boat' is set)
+         q  is the z-axis (up/down) offset of the boat compared to the trailer (required if 'boat' is set)
 
         **NOTE: Sometimes the sections do NOT display if the order in the config below**
     ]]
@@ -457,15 +484,31 @@ Config.ShowCivSpawnCode = true
 Config.CivVehicles = {
 	--[[
         EXAMPLE: 
-		{name = 'a', spawncode = 'b'},
+		{name = 'a', spawncode = 'b', livery = c, color = d, extras = {e, e}, mods = {{f,g},{f,g}}, trailer = 'h', trailerlivery = i, trailerextras = {j, j}, boat = 'k', boatlivery = l, boatcolor = m, boatextras = n, boatxoffset = o, boatyoffset = p, boatzoffset = q},
         ────────────────────────────────────────────────────────────────
         'a' is the title of the vehicle that shows in the menu
         'b' is the spawn code for vehicle that will be spawned
+         c  is the number of the livery which you want it to spawn with
+         d  is the number of the color which you want it to spawn with (see color list here: https://pastebin.com/pwHci0xK)
+         e  is the number(s) of extra(s) which you want it to spawn with
+         f  is the number(s) of the mod type(s) that you want to set (see mod list here: https://docs.fivem.net/natives/?_0x6AF0636DDEDCB6DD)
+         g  is the number(s) of the mod variation(s) that you want
+        'h'  is the spawn code for trailer
+         i  is the number of the livery which you want the trailer to spawn with
+         j  is the number(s) of extra(s) which you want the trailer to spawn with
+        'k'  is the spawn code for boat (or other vehicle to be carried by the trailer)
+         l  is the number of the livery which you want the boat to spawn with
+         m  is the number of the color which you want the boat to spawn with
+         n  is the number(s) of extra(s) which you want the boat to spawn with
+         o  is the x-axis (left/right) offset of the boat compared to the trailer (required if 'boat' is set)
+         p  is the y-axis (forward/back) offset of the boat compared to the trailer (required if 'boat' is set)
+         q  is the z-axis (up/down) offset of the boat compared to the trailer (required if 'boat' is set)
     ]]
 	
 	--These are the Vehicles that will show in the Category and there spawn codes
 	{name = 'Adder', spawncode = 'adder'},
 	{name = 'Baller', spawncode = 'baller'},
+    {name = 'Transport Truck', spawncode = 'packer', color = 35, trailer = 'trailers3'}
 }
 
 --This determines if the civilian adverts sections of the menu if visible
