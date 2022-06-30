@@ -315,7 +315,7 @@ function SpawnVehicle(Veh, Name, Livery, Color, Extras, Mods, Trl, TrlLivery, Tr
                                 SetVehicleExtra(Boat, extraId, true)
                             end
                         end
-				        for _, extra in pairs(TrlExtras) do
+				        for _, extra in pairs(BtExtras) do
 					        if DoesExtraExist(Boat, extra) then
 						        SetVehicleExtra(Boat, extra, false)
 					        end
