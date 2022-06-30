@@ -181,7 +181,7 @@ end
 
 
 --Vehicle Functions
-function SpawnVehicle(Veh, Name, Livery, Extras)
+function SpawnVehicle(Veh, Name, Livery, Color, Extras, Mods, Trl, TrlLivery, TrlExtras, Bt, BtLivery, BtColor, BtExtras, BtXOffset, BtYOffset, BtZOffset)
     local Ped = GetPlayerPed( -1 )
     if (DoesEntityExist(Ped) and not IsEntityDead(Ped)) then 
         local pos = GetEntityCoords(Ped)
@@ -220,6 +220,9 @@ function SpawnVehicle(Veh, Name, Livery, Extras)
     if Livery then
         SetVehicleLivery(Vehicle, Livery)
     end
+    if Color then
+		SetVehicleColours(Vehicle, Color, Color)
+	end
     if Extras then
         for extraId = 0, 30 do
             if DoesExtraExist(Vehicle, extraId) then
@@ -227,9 +230,102 @@ function SpawnVehicle(Veh, Name, Livery, Extras)
             end
         end
         for _, extra in pairs(Extras) do
-            SetVehicleExtra(Vehicle, extra, false)
+            if DoesExtraExist(Vehicle, extra) then
+                SetVehicleExtra(Vehicle, extra, false)
+            end
         end
     end
+    if Mods then
+        for _, mod in pairs(Mods) do
+            SetVehicleMod(Vehicle, mod[1], mod[2] - 2, false)
+        end
+    end
+
+    if Trl then
+		WaitTime = 0
+		Model = GetHashKey(Trl)
+		RequestModel(Model)
+		while not HasModelLoaded(Model) do
+			CancelEvent()
+			RequestModel(Model)
+			Citizen.Wait(100)
+
+			WaitTime = WaitTime + 1
+
+			if WaitTime == 200 then
+				CancelEvent()
+				Notify('~r~Unable to load trailer, please contact development!')
+				break
+			end
+		end
+		if HasModelLoaded(Model) then
+			local Trailer = CreateVehicle(Model, x, y - 5, z + 1, GetEntityHeading(PlayerPedId()), true, false)
+            SetVehicleDirtLevel(Trailer, 0)
+            SetModelAsNoLongerNeeded(Model)
+			if TrlLivery then
+				SetVehicleLivery(Trailer, TrlLivery)
+			end
+			AttachVehicleToTrailer(Vehicle, Trailer, 1.0)
+
+			if TrlExtras then
+                for extraId = 0, 30 do
+                    if DoesExtraExist(Trailer, extraId) then
+                        SetVehicleExtra(Trailer, extraId, true)
+                    end
+                end
+				for _, extra in pairs(TrlExtras) do
+					if DoesExtraExist(Trailer, extra) then
+						SetVehicleExtra(Trailer, extra, false)
+					end
+				end
+				SetVehicleFixed(Trailer)
+			end
+
+			if Bt then
+				Model = GetHashKey(Bt)
+				RequestModel(Model)
+				while not HasModelLoaded(Model) do
+					CancelEvent()
+					RequestModel(Model)
+					Citizen.Wait(100)
+
+					WaitTime = WaitTime + 1
+
+					if WaitTime == 200 then
+						CancelEvent()
+						Notify('~r~Unable to load boat, please contact development!')
+						break
+					end
+				end
+				if HasModelLoaded(Model) then
+					local Boat = CreateVehicle(Model, x, y - 5, z + 4, GetEntityHeading(PlayerPedId()), true, false)
+                    SetVehicleDirtLevel(Boat, 0)
+                    SetModelAsNoLongerNeeded(Model)
+					if BtLivery then
+						SetVehicleLivery(Boat, BtLivery)
+					end
+					if BtColor then
+						SetVehicleColours(Boat, BtColor, BtColor)
+					end
+					AttachEntityToEntity(Boat, Trailer, 20, BtXOffset, BtYOffset, BtZOffset, 0.0, 0.0, 0.0, false, false, true, false, 20, true)
+
+					if BtExtras then
+						for extraId = 0, 30 do
+                            if DoesExtraExist(Boat, extraId) then
+                                SetVehicleExtra(Boat, extraId, true)
+                            end
+                        end
+				        for _, extra in pairs(BtExtras) do
+					        if DoesExtraExist(Boat, extra) then
+						        SetVehicleExtra(Boat, extra, false)
+					        end
+				        end
+						SetVehicleFixed(Boat)
+					end
+				end
+			end
+		end
+	end
 
     if Name then
         Notify('~b~Vehicle Spawned: ~g~' .. Name)

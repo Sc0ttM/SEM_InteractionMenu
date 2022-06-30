@@ -399,7 +399,7 @@ function Menu()
                             LEOVehicle:RightLabel(Vehicle.spawncode)
                         end
                         LEOVehicle.Activated = function(ParentMenu, SelectedItem)
-                            SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle.extras)
+                            SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle.color, Vehicle.extras, Vehicle.mods, Vehicle.trailer, Vehicle.trailerlivery, Vehicle.trailerextras, Vehicle.boat, Vehicle.boatlivery, Vehicle.boatcolor, Vehicle.boatextras, Vehicle.boatxoffset, Vehicle.boatyoffset, Vehicle.boatzoffset)
                         end
                     end
                 end
@@ -688,7 +688,7 @@ function Menu()
                         FireVehicle:RightLabel(Vehicle.spawncode)
                     end
                     FireVehicle.Activated = function(ParentMenu, SelectedItem)
-                        SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle.extras)
+                        SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle.color, Vehicle.extras, Vehicle.mods, Vehicle.trailer, Vehicle.trailerlivery, Vehicle.trailerextras, Vehicle.boat, Vehicle.boatlivery, Vehicle.boatcolor, Vehicle.boatextras, Vehicle.boatxoffset, Vehicle.boatyoffset, Vehicle.boatzoffset)
                     end
                 end
             end
@@ -800,7 +800,7 @@ function Menu()
                         CivVehicle:RightLabel(Vehicle.spawncode)
                     end
                     CivVehicle.Activated = function(ParentMenu, SelectedItem)
-                        SpawnVehicle(Vehicle.spawncode, Vehicle.name)
+                        SpawnVehicle(Vehicle.spawncode, Vehicle.name, Vehicle.livery, Vehicle.color, Vehicle.extras, Vehicle.mods, Vehicle.trailer, Vehicle.trailerlivery, Vehicle.trailerextras, Vehicle.boat, Vehicle.boatlivery, Vehicle.boatcolor, Vehicle.boatextras, Vehicle.boatxoffset, Vehicle.boatyoffset, Vehicle.boatzoffset)
                     end
                 end
             end
