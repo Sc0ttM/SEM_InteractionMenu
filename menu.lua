@@ -760,10 +760,14 @@ function Menu()
                     end
 
                     TriggerServerEvent('SEM_InteractionMenu:BACSet', tonumber(BACLevel))
-                    if tonumber(BACLevel) < 0.08 then
-                        Notify('~b~BAC Level Set: ~g~' .. tostring(BACLevel))
+                    if tonumber(BACLevel) ~= nil then
+                      if tonumber(BACLevel) < 0.08 then
+                          Notify('~b~BAC Level Set: ~g~' .. tostring(BACLevel))
+                      else
+                          Notify('~b~BAC Level Set: ~r~' .. tostring(BACLevel))
+                      end
                     else
-                        Notify('~b~BAC Level Set: ~r~' .. tostring(BACLevel))
+                        Notify('~r~Invalid BAC Level!')
                     end
                 end
                 DropWeapon.Activated = function(ParentMenu, SelectedItem)
